@@ -3,6 +3,7 @@ __author__ = "Xiangyang Ju"
 __version__ = "0.1"
 import ROOT
 from array import array
+import AtlasStyle
 
 import os
 import errno
