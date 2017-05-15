@@ -3,7 +3,11 @@ __author__ = "Xiangyang Ju"
 __version__ = "0.1"
 import ROOT
 from array import array
-import adder
+
+import os
+import errno
+
+from adder import adder
 
 class Ploter:
     def __init__(self, status="Internal", lumi=36.47):
@@ -260,13 +264,15 @@ class Ploter:
 
 
     def add_atlas(self):
-        adder.add_text(self.x_off_atlas, self.y_offset, 
-                      1, "#bf{#it{ATLAS}} "+self.status)
+        adder.add_text(self.x_off_atlas, self.y_offset,
+                      1, "#bf{#it{ATLAS}} "+self.status,
+                      self.text_size)
 
     def add_lumi(self):
         adder.add_text(self.x_off_atlas,
                       self.y_offset - self.text_size - 0.007,
-                      1, "13 TeV, "+str(self.lumi)+" fb^{-1}")
+                      1, "13 TeV, "+str(self.lumi)+" fb^{-1}",
+                      self.text_size)
 
     def get_offset(self, hist):
         max_bin = hist.GetMaximumBin()
@@ -339,7 +345,8 @@ class Ploter:
         a list of histograms,
         Key words include:  
             ratio_title, ratio_range, logY, out_name
-            no_fill, x_offset, draw_option, add_yields, 
+            no_fill, x_offset, draw_option,
+            add_yields,
             out_folder
         """
         self.del_obj()
@@ -424,7 +431,7 @@ class Ploter:
         except KeyError:
             out_folder = "./"
 
-        helper.mkdir_p(out_folder)
+        self.mkdir_p(out_folder)
 
         if is_logy:
             self.can.SaveAs(out_folder+"/"+out_name+"_Log.eps")
@@ -583,5 +590,13 @@ class Ploter:
         )
         return gr,gr_one,gr_two
 
-
-
+    @staticmethod
+    def mkdir_p(path):
+        try:
+            os.makedirs(path)
+            print path,"is created"
+        except OSError as exc:
+            if exc.errno == errno.EEXIST and os.path.isdir(path):
+                pass
+            else:
+                raise
