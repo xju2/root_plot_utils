@@ -336,7 +336,7 @@ class Ploter:
 
             this_hist.GetYaxis().SetRangeUser(4E-3, y_max*1e2)
         else:
-            this_hist.GetYaxis().SetRangeUser(1E-3, y_max*1.1)
+            this_hist.GetYaxis().SetRangeUser(y_min-0.1, y_max*1.1)
             pass
 
         return this_hist
