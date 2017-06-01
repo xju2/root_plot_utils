@@ -11,7 +11,7 @@ import errno
 from adder import adder
 
 class Ploter:
-    def __init__(self, status="Internal", lumi=36.47):
+    def __init__(self, status="Internal", lumi=36.1):
         self.status = status
         self.lumi = lumi
 
@@ -21,7 +21,7 @@ class Ploter:
         self.has_data = False
 
         # predefined colors
-        self.COLORS = [64, 95, 28, 29, 209, 5, 432, 433, 434, 435, 436, 8, 6]
+        self.COLORS = [206, 64, 95, 28, 29, 209, 5, 432, 433, 434, 435, 436, 8, 6]
         self.LINE_STYLE = [1]*10
         self.VerticalCanvasSplit = 0.4
 
@@ -41,7 +41,7 @@ class Ploter:
         # atlas and legend offset
         self.x_offset = 0.20
         self.x_off_atlas = 0.65
-        self.y_offset = 0.80
+        self.y_offset = 0.85
 
         # show sum of background for x-check
         self.show_sum_bkg = True
@@ -146,7 +146,13 @@ class Ploter:
         hist_sum = None
         for i, hist in enumerate(hist_list):
             new_hist = hist.Clone(hist.GetName()+"_clone")
-            color = self.COLORS[i]
+            if has_data and i!=0:
+                color = self.COLORS[i-1]
+            elif has_data:
+                color = 1
+            else:
+                color = self.COLORS[i]
+
             new_hist.SetLineColor(color)
 
             if i==0 and has_data:
@@ -252,26 +258,29 @@ class Ploter:
     def get_legend(self, nentries):
         x_min = self.x_offset
         x_max = x_min + 0.3
-        y_max = self.y_offset-self.text_size*2-0.001
+        # y_max = self.y_offset-self.text_size*2-0.001
+        # y_min = y_max - self.t_size*nentries
+        y_max = self.y_offset 
         y_min = y_max - self.t_size*nentries
 
         legend = ROOT.TLegend(x_min, y_min, x_max, y_max)
         legend.SetFillColor(0)
         legend.SetBorderSize(0)
         legend.SetTextFont(42)
-        legend.SetTextSize(0.035)
+        # legend.SetTextSize(0.035)
+        legend.SetTextSize(self.t_size)
 
         return legend
 
 
     def add_atlas(self):
-        adder.add_text(self.x_off_atlas, self.y_offset,
+        adder.add_text(self.x_off_atlas, self.y_offset-0.03,
                       1, "#bf{#it{ATLAS}} "+self.status,
                       self.text_size)
 
     def add_lumi(self):
         adder.add_text(self.x_off_atlas,
-                      self.y_offset - self.text_size - 0.007,
+                      self.y_offset - self.text_size - 0.007-0.03,
                       1, "13 TeV, "+str(self.lumi)+" fb^{-1}",
                       self.text_size)
 
@@ -282,6 +291,7 @@ class Ploter:
         first_bin = hist.GetXaxis().GetFirst()
         if max_bin < first_bin + (last_bin - first_bin)/2.:
             self.x_offset = 0.60
+            self.x_off_atlas = 0.2
 
 
     def stack(self, hist_list):
@@ -313,20 +323,10 @@ class Ploter:
             hist.SetMarkerColor(color)
             hist.SetLineStyle(self.LINE_STYLE[i])
 
-    def set_y_range(self, hist_data, hist_splusb, is_logY):
-        y_max = hist_splusb.GetMaximum()
-        y_min = hist_splusb.GetMinimum()
-        if hist_data:
-            this_hist = hist_data
-            if y_max < hist_data.GetMaximum():
-                y_max = hist_data.GetMaximum()
-
-            if y_min > hist_data.GetMinimum():
-                y_min = hist_data.GetMinimum()
-
-        else:
-            this_hist = hist_splusb
-
+    def set_y_range(self, hist_list, is_logY):
+        hist = hist_list[0]
+        y_max = max(hist_list, key=lambda x: x.GetMaximum()).GetMaximum()
+        y_min = min(hist_list, key=lambda x: x.GetMinimum()).GetMinimum()
 
         if is_logY:
             if self.add_ratio:
@@ -334,35 +334,43 @@ class Ploter:
             else:
                 self.can.SetLogy()
 
-            this_hist.GetYaxis().SetRangeUser(4E-3, y_max*1e2)
+            hist.GetYaxis().SetRangeUser(4E-3, y_max*1e2)
         else:
-            this_hist.GetYaxis().SetRangeUser(y_min-0.1, y_max*1.1)
+            if y_min < 0:
+                y_min *= 1.1
+            else:
+                y_min *= 0.9
+            hist.GetYaxis().SetRangeUser(y_min, y_max*1.1)
             pass
-
-        return this_hist
 
     def compare_hists(self, hist_list, tag_list, **kwargs):
         """
         a list of histograms,
-        Key words include:  
+        Key words include:
             ratio_title, ratio_range, logY, out_name
             no_fill, x_offset, draw_option,
-            add_yields,
+            add_yields, add_ratio,
             out_folder
         """
         self.del_obj()
 
         if len(hist_list) < 2:
             print "not enough hitograms for comparison"
-            return 
+            return
         try:
             no_fill = kwargs["no_fill"]
         except KeyError:
             no_fill = False
 
+        try:
+            add_ratio = self.add_ratio = kwargs["add_ratio"]
+        except KeyError:
+            add_ratio = self.add_ratio
+
+
         self.color(hist_list, no_fill)
 
-        if self.add_ratio:
+        if add_ratio:
             self.prepare_2pad_canvas('canvas', 600, 600)
             self.pad2.cd()
             try:
@@ -394,9 +402,7 @@ class Ploter:
 
         legend = self.get_legend(len(hist_list))
 
-        this_hist = self.set_y_range(hist_list[0], hist_list[1], is_logy)
-        # y_axis = this_hist.GetMaximum()
-        # this_hist.GetYaxis().SetRangeUser(0, y_axis*1.5)
+        self.set_y_range(hist_list, is_logy)
         try:
             draw_option = kwargs["draw_option"]
         except KeyError:
@@ -409,7 +415,7 @@ class Ploter:
 
         for i, hist in enumerate(hist_list):
             if add_yield:
-                legend.AddEntry(hist, "{}: {:.3E}".format(tag_list[i], hist.Integral()))
+                legend.AddEntry(hist, "{}: {:.3f}".format(tag_list[i], hist.Integral()))
             else:
                 legend.AddEntry(hist, tag_list[i])
 
