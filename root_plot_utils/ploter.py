@@ -26,7 +26,7 @@ class Ploter:
         self.VerticalCanvasSplit = 0.4
 
         # parameters for label/title size
-        self.t_size = 0.05
+        self.t_size = 0.04
         self.x_title_size = 0.05
         self.text_size = 0.05
 
@@ -260,7 +260,7 @@ class Ploter:
         x_max = x_min + 0.3
         # y_max = self.y_offset-self.text_size*2-0.001
         # y_min = y_max - self.t_size*nentries
-        y_max = self.y_offset 
+        y_max = self.y_offset
         y_min = y_max - self.t_size*nentries
 
         legend = ROOT.TLegend(x_min, y_min, x_max, y_max)
@@ -350,7 +350,7 @@ class Ploter:
             ratio_title, ratio_range, logY, out_name
             no_fill, x_offset, draw_option,
             add_yields, add_ratio,
-            out_folder
+            out_folder, label
         """
         self.del_obj()
 
@@ -427,6 +427,10 @@ class Ploter:
         legend.Draw("same")
         self.add_atlas()
         self.add_lumi()
+        if 'label' in kwargs.keys():
+            adder.add_text(self.x_off_atlas, 
+                           self.y_offset - self.text_size*2 - 0.007-0.03,
+                           1, kwargs['label'], self.text_size)
 
         try:
             out_name = kwargs["out_name"]
@@ -442,8 +446,10 @@ class Ploter:
 
         if is_logy:
             self.can.SaveAs(out_folder+"/"+out_name+"_Log.eps")
+            self.can.SaveAs(out_folder+"/"+out_name+"_Log.pdf")
         else:
             self.can.SaveAs(out_folder+"/"+out_name+".eps")
+            self.can.SaveAs(out_folder+"/"+out_name+".pdf")
 
     def set_y_offset(self):
         if not self.add_ratio:

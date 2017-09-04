@@ -31,3 +31,12 @@ class adder(object):
             line.DrawLine(x_low, y_val, x_hi, y_val)
         else:
             line.DrawLine(y_val, y_low, y_val, y_hi)
+
+    @staticmethod
+    def make_legend(x1, y1, x2, y2):
+        legend = ROOT.TLegend(x1, y1, x2, y2)
+        legend.SetBorderSize(0)
+        legend.SetFillColor(0)
+        legend.SetTextFont(42)
+        legend.SetTextSize(0.04)
+        return legend

@@ -27,7 +27,7 @@ class maker:
         )
         gr.SetName(name)
         return gr
-    
+
     @staticmethod
     def unequal_bin_hist(hist_name, bin_list):
         """
