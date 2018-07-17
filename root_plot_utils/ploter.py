@@ -110,8 +110,9 @@ class Ploter:
                 hist.GetXaxis().SetTitleSize(self.x_title_size*labelscalefact)
                 hist.GetXaxis().SetTitleOffset(1.4)
 
-                #hist.Draw("AXIS")
-                hist.Draw("E2")
+                hist.Draw("AXIS")
+                #hist.Draw("HIST")
+                #hist.Draw("E2")
             else:
                 # start to calculate the ratio
                 if reverse: # MC/Data
@@ -124,7 +125,7 @@ class Ploter:
                     print "Yields:",hist.Integral(), h_refer.Integral()
 
                 self.totalObj.append(this_hist)
-                this_hist.Draw("EP SAME")
+                this_hist.Draw("HIST SAME")
 
 
     def stack_hists(self,
