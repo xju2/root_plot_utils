@@ -1,42 +1,34 @@
 #!/usr/bin/env python
 import ROOT
 
-class adder(object):
-    """
-    Add line/text into canvas
-    """
-    def __init__(self):
-        pass
+def add_text(x, y, color, text, size=0.05, font=42):
+    l = ROOT.TLatex()
+    l.SetTextSize(size)
+    l.SetNDC()
+    l.SetTextColor(color)
+    l.SetTextFont(font)
+    l.DrawLatex(x, y, text)
 
-    @staticmethod
-    def add_text(x, y, color, text, size=0.05, font=42):
-        l = ROOT.TLatex()
-        l.SetTextSize(size)
-        l.SetNDC()
-        l.SetTextColor(color)
-        l.SetTextFont(font)
-        l.DrawLatex(x, y, text)
 
-    @staticmethod
-    def add_line(hist, y_val, color=1, style=2, option="x"):
-        x_low = hist.GetBinLowEdge(hist.GetXaxis().GetFirst())
-        x_hi = hist.GetBinLowEdge(hist.GetXaxis().GetLast()+1)
-        y_low = hist.GetBinLowEdge(hist.GetYaxis().GetFirst())
-        y_hi = hist.GetBinLowEdge(hist.GetYaxis().GetLast()+1)
-        line = ROOT.TLine()
-        line.SetLineColor(color)
-        line.SetLineStyle(style)
-        line.SetLineWidth(2)
-        if option.lowercase() == "x":
-            line.DrawLine(x_low, y_val, x_hi, y_val)
-        else:
-            line.DrawLine(y_val, y_low, y_val, y_hi)
+def add_line(hist, y_val, color=1, style=2, option="x"):
+    x_low = hist.GetBinLowEdge(hist.GetXaxis().GetFirst())
+    x_hi = hist.GetBinLowEdge(hist.GetXaxis().GetLast()+1)
+    y_low = hist.GetBinLowEdge(hist.GetYaxis().GetFirst())
+    y_hi = hist.GetBinLowEdge(hist.GetYaxis().GetLast()+1)
+    line = ROOT.TLine()
+    line.SetLineColor(color)
+    line.SetLineStyle(style)
+    line.SetLineWidth(2)
+    if option.lowercase() == "x":
+        line.DrawLine(x_low, y_val, x_hi, y_val)
+    else:
+        line.DrawLine(y_val, y_low, y_val, y_hi)
 
-    @staticmethod
-    def make_legend(x1, y1, x2, y2):
-        legend = ROOT.TLegend(x1, y1, x2, y2)
-        legend.SetBorderSize(0)
-        legend.SetFillColor(0)
-        legend.SetTextFont(42)
-        legend.SetTextSize(0.04)
-        return legend
+
+def make_legend(x1, y1, x2, y2):
+    legend = ROOT.TLegend(x1, y1, x2, y2)
+    legend.SetBorderSize(0)
+    legend.SetFillColor(0)
+    legend.SetTextFont(42)
+    legend.SetTextSize(0.04)
+    return legend
