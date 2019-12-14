@@ -89,10 +89,12 @@ class Ploter:
         self.totalObj.append(hist_list_cp)
 
         h_refer = hist_list_cp[0].Clone("Histreference")
-        h_refer.Sumw2(False)
+        if h_refer.GetSumw2 is None:
+            h_refer.Sumw2(True)
         self.totalObj.append(h_refer)
         for i, hist in enumerate(hist_list_cp):
-            hist.Sumw2(False)
+            if hist.GetSumw2 is None:
+                hist.Sumw2(True)
             if i==0:
 
                 hist.Divide(h_refer)
@@ -126,8 +128,8 @@ class Ploter:
                     print("Yields:",hist.Integral(), h_refer.Integral())
 
                 self.totalObj.append(this_hist)
-                this_hist.Draw("HIST SAME")
-                #this_hist.Draw("E SAME")
+                #this_hist.Draw("HIST SAME")
+                this_hist.Draw("HIST E SAME")
 
 
     def stack_hists(self,
