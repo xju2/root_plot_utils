@@ -91,9 +91,8 @@ class Ploter:
         self.totalObj.append(h_refer)
         # print "REFER:", h_refer.Integral()
         for i, hist in enumerate(hist_list_cp):
+            hist.Sumw2()
             if i==0:
-
-                hist.Sumw2()
                 hist.Divide(h_refer)
                 hist.SetFillColor(1)
                 hist.SetFillStyle(3010)
@@ -120,12 +119,19 @@ class Ploter:
                     this_hist.Divide(h_refer)
                 else: # Data/MC
                     this_hist = h_refer.Clone(hist.GetName()+"_cpDI")
-                    this_hist.SetLineColor(hist.GetLineColor())
+                    if len(hist_list_cp) == 2:
+                        this_hist.SetLineColor(1)
+                        this_hist.SetMarkerColor(1)
+                    else:
+                        this_hist.SetLineColor(hist.GetLineColor())
                     this_hist.Divide(hist)
                     print "Yields:",hist.Integral(), h_refer.Integral()
 
                 self.totalObj.append(this_hist)
-                this_hist.Draw("HIST SAME")
+                #this_hist.Draw("HIST SAME")
+                this_hist.Draw("EP SAME")
+        adder.add_line(h_refer, 1.0)
+
 
 
     def stack_hists(self,
@@ -279,10 +285,12 @@ class Ploter:
                       1, "#bf{#it{ATLAS}} "+self.status,
                       self.text_size)
 
-    def add_lumi(self):
+    def add_lumi(self, lumi=-1):
+        if lumi < 0:
+            lumi = self.lumi
         adder.add_text(self.x_off_atlas,
                       self.y_offset - self.text_size - 0.007-0.03,
-                      1, "13 TeV, "+str(self.lumi)+" fb^{-1}",
+                      1, "13 TeV, "+str(lumi)+" fb^{-1}",
                       self.text_size)
 
     def get_offset(self, hist):
@@ -429,7 +437,7 @@ class Ploter:
         self.add_atlas()
         self.add_lumi()
         if 'label' in kwargs.keys():
-            adder.add_text(self.x_off_atlas, 
+            adder.add_text(self.x_off_atlas,
                            self.y_offset - self.text_size*2 - 0.007-0.03,
                            1, kwargs['label'], self.text_size)
 
