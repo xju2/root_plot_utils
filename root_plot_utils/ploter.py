@@ -1,14 +1,16 @@
-#!/usr/bin/env python
+from __future__ import absolute_import
+from __future__ import print_function
 __author__ = "Xiangyang Ju"
 __version__ = "0.1"
+
 import ROOT
 from array import array
-import AtlasStyle
+from root_plot_utils import AtlasStyle
 
 import os
 import errno
 
-from adder import adder
+from root_plot_utils import adder
 
 class Ploter:
     def __init__(self, status="Internal", lumi=36.1):
@@ -80,18 +82,20 @@ class Ploter:
         #    y_title = "MC/Data"
 
         if len(hist_list) < 2:
-            print "less than 2 histograms, kidding?"
+            print("less than 2 histograms, kidding?")
             return None
 
         hist_list_cp = [x.Clone(x.GetName()+"_cloneRatio") for x in hist_list]
         self.totalObj.append(hist_list_cp)
 
         h_refer = hist_list_cp[0].Clone("Histreference")
-        h_refer.Sumw2()
+        if h_refer.GetSumw2 is None:
+            h_refer.Sumw2(True)
         self.totalObj.append(h_refer)
-        # print "REFER:", h_refer.Integral()
         for i, hist in enumerate(hist_list_cp):
-            hist.Sumw2()
+
+            if hist.GetSumw2 is None:
+                hist.Sumw2(True)
             if i==0:
                 hist.Divide(h_refer)
                 hist.SetFillColor(1)
@@ -125,13 +129,12 @@ class Ploter:
                     else:
                         this_hist.SetLineColor(hist.GetLineColor())
                     this_hist.Divide(hist)
-                    print "Yields:",hist.Integral(), h_refer.Integral()
+                    print("Yields:",hist.Integral(), h_refer.Integral())
 
                 self.totalObj.append(this_hist)
                 #this_hist.Draw("HIST SAME")
                 this_hist.Draw("EP SAME")
         adder.add_line(h_refer, 1.0)
-
 
 
     def stack_hists(self,
@@ -143,7 +146,7 @@ class Ploter:
 
         # In hist_list, the data should be first element, if has_data
         if len(hist_list) > len(self.COLORS):
-            print "I don't have enough colors", len(hist_list), len(self.COLORS)
+            print("{} histograms but only {} predefined colors".format(len(hist_list), len(self.COLORS)))
             return
 
         # clone current histograms, so that inputs are untouched.
@@ -300,7 +303,7 @@ class Ploter:
         first_bin = hist.GetXaxis().GetFirst()
         if max_bin < first_bin + (last_bin - first_bin)/2.:
             self.x_offset = 0.60
-            self.x_off_atlas = 0.2
+            self.x_off_atlas = 0.25
 
 
     def stack(self, hist_list):
@@ -330,6 +333,7 @@ class Ploter:
             if not no_fill:
                 hist.SetFillColor(color)
             hist.SetMarkerColor(color)
+            hist.SetMarkerSize(0.5)
             hist.SetLineStyle(self.LINE_STYLE[i])
 
     def set_y_range(self, hist_list, is_logY):
@@ -349,7 +353,9 @@ class Ploter:
                 y_min *= 1.1
             else:
                 y_min *= 0.9
-            hist.GetYaxis().SetRangeUser(y_min, y_max*1.1)
+            if abs(y_min) < 1E-6:
+                y_min = 1E-3
+            hist.GetYaxis().SetRangeUser(y_min, y_max*1.3)
             pass
 
     def compare_hists(self, hist_list, tag_list, **kwargs):
@@ -359,13 +365,34 @@ class Ploter:
             ratio_title, ratio_range, logY, out_name
             no_fill, x_offset, draw_option,
             add_yields, add_ratio,
-            out_folder, label
+            out_folder, label,
+            density
         """
         self.del_obj()
 
         if len(hist_list) < 2:
-            print "not enough hitograms for comparison"
+            print("not enough hitograms for comparison")
             return
+        has_empty_hist = False
+        for hist in hist_list:
+            if hist.Integral() < 1E-7:
+                has_empty_hist = True
+                break
+        if has_empty_hist:
+            return
+
+        # shape comparison
+        try:
+            density = kwargs['density']
+        except KeyError:
+            density = False
+
+        if density:
+            print("performing shape comparison")
+            for h in hist_list:
+                h.Sumw2()
+                h.Scale(1./h.Integral())
+
         try:
             no_fill = kwargs["no_fill"]
         except KeyError:
@@ -385,7 +412,7 @@ class Ploter:
             try:
                 ratio_title = kwargs["ratio_title"]
             except KeyError:
-                ratio_title = "MC/Data"
+                ratio_title = "MC / Data"
 
             try:
                 ratio_x, ratio_y = kwargs["ratio_range"]
@@ -429,7 +456,7 @@ class Ploter:
                 legend.AddEntry(hist, tag_list[i])
 
             if i==0:
-                hist.Draw(draw_option)
+                hist.Draw("EP")
             else:
                 hist.Draw(draw_option+" SAME")
 
@@ -460,6 +487,7 @@ class Ploter:
             self.can.SaveAs(out_folder+"/"+out_name+".eps")
             self.can.SaveAs(out_folder+"/"+out_name+".pdf")
 
+
     def set_y_offset(self):
         if not self.add_ratio:
             self.y_offset = 0.88
@@ -469,7 +497,7 @@ class Ploter:
             del obj
 
         if self.can:
-            del self.can
+            self.can.Close()
 
         if self.pad1:
             del self.pad1
@@ -532,9 +560,8 @@ class Ploter:
 
         final_bins = h2d.GetNbinsX() - len(empty_xbins)
         org_bins = h2d.GetNbinsX()
-        print "original bins", org_bins
-        print "final bins: ", final_bins
-        #print empty_xbins
+        print("originally {} bins".format(org_bins))
+        print("finally {} bins".format(final_bins))
         if True:
             h2d_new = ROOT.TH2D("reduced_correlation", "reduced_correlation",
                                 final_bins, 0.5, final_bins+0.5,
@@ -550,7 +577,6 @@ class Ploter:
                         continue
                     new_y += 1
                     value = h2d.GetBinContent(xbin+1, ybin+1)
-                    # print xbin,ybin,new_x,new_y, value
 
                     h2d_new.SetBinContent(new_x, new_y, value)
                     h2d_new.GetXaxis().SetBinLabel(new_x, h2d.GetXaxis().GetBinLabel(xbin+1))
@@ -567,7 +593,7 @@ class Ploter:
         info = input_list[0]
 
         if len(info) != 4:
-            print "input should be a list of tuple of size of 4"
+            print("input should be a list of tuple of size of 4")
             return None
     
         label_list = []
@@ -616,7 +642,7 @@ class Ploter:
     def mkdir_p(path):
         try:
             os.makedirs(path)
-            print path,"is created"
+            print(path,"is created")
         except OSError as exc:
             if exc.errno == errno.EEXIST and os.path.isdir(path):
                 pass
