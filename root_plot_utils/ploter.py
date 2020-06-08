@@ -383,7 +383,9 @@ class Ploter:
         if density:
             print("performing shape comparison")
             for h in hist_list:
-                h.Sumw2()
+                if h_refer.GetSumw2 is None:
+                    h.Sumw2()
+
                 h.Scale(1./h.Integral())
 
         try:
