@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 import ROOT
+from array import array
+import math
 
 def add_text(x, y, color, text, size=0.05, font=42):
     l = ROOT.TLatex()
@@ -32,3 +34,32 @@ def make_legend(x1, y1, x2, y2):
     legend.SetTextFont(42)
     legend.SetTextSize(0.04)
     return legend
+    
+
+def add_band(hist, center, width, add_stats=True):
+    x = array('d')
+    y = array('d')
+    up = array('d')
+    down = array('d')
+    weight = hist.Integral()/hist.GetEntries()
+    for i in range(hist.GetXaxis().GetNbins()):
+        ibin = i+1
+        if add_stats:
+            content = hist.GetBinContent(ibin)/weight
+            width = math.sqrt(width**2 + 1./content)
+
+        x.append(hist.GetXaxis().GetBinCenter(ibin))
+        y.append(center)
+        up.append(center + width)
+        down.append(max(center - width, 0))
+
+    n = len(x)
+    grband = ROOT.TGraph(2*n)
+    for i in range(n):
+        grband.SetPoint(i, x[i], up[i])
+        grband.SetPoint(n+i, x[n-i-1], down[n-i-1])
+
+    grband.SetFillStyle(3013)
+    grband.SetFillColor(16)
+    #grband.Draw("F SAME")
+    return grband
