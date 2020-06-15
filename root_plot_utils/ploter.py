@@ -28,8 +28,9 @@ class Ploter:
         self.VerticalCanvasSplit = 0.4
 
         # parameters for label/title size
-        self.t_size = 0.04
-        self.x_title_size = 0.05
+        self.t_size = 0.05
+        self.x_title_size = 0.065
+        # self.x_title_offset = 1.0
         self.text_size = 0.05
 
         # my canvas
@@ -43,7 +44,7 @@ class Ploter:
         # atlas and legend offset
         self.x_offset = 0.20
         self.x_off_atlas = 0.65
-        self.y_offset = 0.85
+        self.y_offset = 0.82
 
         # show sum of background for x-check
         self.show_sum_bkg = True
@@ -56,11 +57,11 @@ class Ploter:
         self.can = ROOT.TCanvas(cname,cname,width,height)
         self.pad1 = ROOT.TPad("p1_"+cname,cname,0.0, self.VerticalCanvasSplit,1.0,1.0)
         self.pad2 = ROOT.TPad("p2_"+cname,cname,0.0,0.0, 1.0, self.VerticalCanvasSplit)
-        self.pad1.SetBottomMargin(0)
+        self.pad1.SetBottomMargin(0.02)
         self.pad1.SetTopMargin(0.09)
         self.pad1.SetLeftMargin(0.17)
         self.pad2.Draw()
-        self.pad2.SetTopMargin(0)
+        self.pad2.SetTopMargin(0.023)
         self.pad2.SetBottomMargin(0.4)
         self.pad2.SetLeftMargin(0.17)
         self.pad2.SetGridy()
@@ -91,7 +92,35 @@ class Ploter:
         h_refer = hist_list_cp[0].Clone("Histreference")
         if h_refer.GetSumw2 is None:
             h_refer.Sumw2(True)
+
         self.totalObj.append(h_refer)
+
+        # automatically determin maximum and minimum range
+        y_max_auto = 0
+        y_min_auto = 100
+        for i, hist in enumerate(hist_list_cp):
+            if i==0:
+                continue
+            
+            if reverse:
+                this_hist = hist.Clone(hist.GetName()+"_cp1")
+                this_hist.Divide(h_refer)
+            else:
+                this_hist = h_refer.Clone(hist.GetName()+"_cpDI")
+                this_hist.Divide(hist)
+            imax_bin = this_hist.GetMaximumBin()
+            this_ymax = this_hist.GetBinContent(imax_bin) + this_hist.GetBinError(imax_bin)
+            imin_bin = this_hist.GetMinimumBin()
+            this_min = this_hist.GetBinContent(imin_bin) - this_hist.GetBinError(imin_bin)
+
+            y_max_auto = this_ymax if this_ymax > y_max_auto else y_max_auto
+            y_min_auto = this_min if this_min < y_min_auto else y_min_auto
+            del this_hist
+        if y_max is None:
+            y_max = y_max_auto * 1.01
+        if y_min is None:
+            y_min = y_min_auto * 0.99
+
         for i, hist in enumerate(hist_list_cp):
 
             if hist.GetSumw2 is None:
@@ -102,20 +131,22 @@ class Ploter:
                 hist.SetFillStyle(3010)
                 hist.SetMarkerSize(0.001)
 
-                labelscalefact = 1. / (1. - self.VerticalCanvasSplit)
+                labelscalefact = 1. / (1. - self.VerticalCanvasSplit + 0.1)
+                # labelscalefact = 1.0
                 hist.GetYaxis().SetTitle(y_title)
                 hist.GetYaxis().SetTitleSize(self.t_size*labelscalefact)
                 hist.GetYaxis().SetLabelSize(self.t_size*labelscalefact)
                 hist.GetYaxis().SetRangeUser(y_min, y_max)
-                hist.GetYaxis().SetTitleOffset(0.8)
+                hist.GetYaxis().SetTitleOffset(0.95)
+                hist.SetNdivisions(507, "Y")
 
                 hist.GetXaxis().SetLabelSize(self.t_size*labelscalefact)
                 hist.GetXaxis().SetTitleSize(self.x_title_size*labelscalefact)
-                hist.GetXaxis().SetTitleOffset(1.4)
+                hist.GetXaxis().SetLabelOffset(0.04)
+                hist.GetXaxis().SetTitleOffset(1.2)
+
 
                 hist.Draw("AXIS")
-                #hist.Draw("HIST")
-                #hist.Draw("E2")
             else:
                 # start to calculate the ratio
                 if reverse: # MC/Data
@@ -129,11 +160,11 @@ class Ploter:
                     else:
                         this_hist.SetLineColor(hist.GetLineColor())
                     this_hist.Divide(hist)
-                    print("Yields:",hist.Integral(), h_refer.Integral())
+                    # print("Yields:",hist.Integral(), h_refer.Integral())
 
                 self.totalObj.append(this_hist)
-                #this_hist.Draw("HIST SAME")
-                this_hist.Draw("EP SAME")
+                this_hist.Draw("HIST E SAME")
+                # this_hist.Draw("EP SAME")
         adder.add_line(h_refer, 1.0)
 
 
@@ -270,8 +301,8 @@ class Ploter:
         x_max = x_min + 0.3
         # y_max = self.y_offset-self.text_size*2-0.001
         # y_min = y_max - self.t_size*nentries
-        y_max = self.y_offset
-        y_min = y_max - self.t_size*nentries
+        y_max = self.y_offset + 0.06
+        y_min = y_max - self.t_size*nentries - 0.007*nentries
 
         legend = ROOT.TLegend(x_min, y_min, x_max, y_max)
         legend.SetFillColor(0)
@@ -284,7 +315,7 @@ class Ploter:
 
 
     def add_atlas(self):
-        adder.add_text(self.x_off_atlas, self.y_offset-0.03,
+        adder.add_text(self.x_off_atlas, self.y_offset,
                       1, "#bf{#it{ATLAS}} "+self.status,
                       self.text_size)
 
@@ -292,8 +323,8 @@ class Ploter:
         if lumi < 0:
             lumi = self.lumi
         adder.add_text(self.x_off_atlas,
-                      self.y_offset - self.text_size - 0.007-0.03,
-                      1, "13 TeV, "+str(lumi)+" fb^{-1}",
+                      self.y_offset - self.text_size - 0.007 ,
+                      1, r"#sqrt{s} = 13 TeV, "+str(lumi)+" fb^{-1}",
                       self.text_size)
 
     def get_offset(self, hist):
@@ -302,7 +333,7 @@ class Ploter:
         last_bin = hist.GetXaxis().GetLast()
         first_bin = hist.GetXaxis().GetFirst()
         if max_bin < first_bin + (last_bin - first_bin)/2.:
-            self.x_offset = 0.60
+            self.x_offset = 0.53
             self.x_off_atlas = 0.25
 
 
@@ -336,7 +367,7 @@ class Ploter:
             hist.SetMarkerSize(0.5)
             hist.SetLineStyle(self.LINE_STYLE[i])
 
-    def set_y_range(self, hist_list, is_logY):
+    def get_y_range(self, hist_list, is_logY):
         hist = hist_list[0]
         y_max = max(hist_list, key=lambda x: x.GetMaximum()).GetMaximum()
         y_min = min(hist_list, key=lambda x: x.GetMinimum()).GetMinimum()
@@ -347,7 +378,8 @@ class Ploter:
             else:
                 self.can.SetLogy()
 
-            hist.GetYaxis().SetRangeUser(4E-3, y_max*1e2)
+            return (4E-3, y_max*1e2)
+            # hist.GetYaxis().SetRangeUser(4E-3, y_max*1e2)
         else:
             if y_min < 0:
                 y_min *= 1.1
@@ -355,8 +387,9 @@ class Ploter:
                 y_min *= 0.9
             if abs(y_min) < 1E-6:
                 y_min = 1E-3
-            hist.GetYaxis().SetRangeUser(y_min, y_max*1.3)
-            pass
+            return (y_min, y_max*1.3)
+            # hist.GetYaxis().SetRangeUser(y_min, y_max*1.3)
+
 
     def compare_hists(self, hist_list, tag_list, **kwargs):
         """
@@ -388,11 +421,10 @@ class Ploter:
             density = False
 
         if density:
-            print("performing shape comparison")
+            # print("performing shape comparison")
             for h in hist_list:
-                if h_refer.GetSumw2 is None:
+                if h.GetSumw2 is None:
                     h.Sumw2()
-
                 h.Scale(1./h.Integral())
 
         try:
@@ -411,17 +443,13 @@ class Ploter:
         if add_ratio:
             self.prepare_2pad_canvas('canvas', 600, 600)
             self.pad2.cd()
-            try:
-                ratio_title = kwargs["ratio_title"]
-            except KeyError:
-                ratio_title = "MC / Data"
 
-            try:
-                ratio_x, ratio_y = kwargs["ratio_range"]
-            except KeyError:
-                ratio_x, ratio_y = 0.55, 1.42
+            ratio_title = kwargs.get("ratio_title", "MC / Data")
+            ratio_x, ratio_y = kwargs.get("ratio_range", (None, None))
+            reserve = kwargs.get("reverse_ratio", True)
 
-            self.add_ratio_panel(hist_list, ratio_title, ratio_x, ratio_y, True)
+            self.add_ratio_panel(hist_list, ratio_title, ratio_x, ratio_y, reserve)
+            hist_list[0].GetXaxis().SetLabelOffset(10) # donot display labels for upper panel
             self.pad1.cd()
         else:
             self.text_size = 0.04
@@ -440,7 +468,11 @@ class Ploter:
 
         legend = self.get_legend(len(hist_list))
 
-        self.set_y_range(hist_list, is_logy)
+        y_min, y_max = self.get_y_range(hist_list, is_logy)
+        if "y_min" in kwargs:
+            y_min = kwargs['y_min']
+
+        hist_list[0].GetYaxis().SetRangeUser(y_min, y_max)
         try:
             draw_option = kwargs["draw_option"]
         except KeyError:
@@ -452,6 +484,7 @@ class Ploter:
             add_yield = False
 
         for i, hist in enumerate(hist_list):
+
             if add_yield:
                 legend.AddEntry(hist, "{}: {:.3f}".format(tag_list[i], hist.Integral()))
             else:
@@ -462,12 +495,13 @@ class Ploter:
             else:
                 hist.Draw(draw_option+" SAME")
 
+        hist_list[0].Draw("EP SAME")
         legend.Draw("same")
         self.add_atlas()
         self.add_lumi()
         if 'label' in kwargs.keys():
             adder.add_text(self.x_off_atlas,
-                           self.y_offset - self.text_size*2 - 0.007-0.03,
+                           self.y_offset - self.text_size*2 - 0.007*2,
                            1, kwargs['label'], self.text_size)
 
         try:

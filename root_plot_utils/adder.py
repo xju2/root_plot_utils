@@ -21,7 +21,7 @@ def add_line(hist, y_val, color=1, style=2, option="x"):
     line.SetLineColor(color)
     line.SetLineStyle(style)
     line.SetLineWidth(2)
-    if option.lowercase() == "x":
+    if option.lower() == "x":
         line.DrawLine(x_low, y_val, x_hi, y_val)
     else:
         line.DrawLine(y_val, y_low, y_val, y_hi)
