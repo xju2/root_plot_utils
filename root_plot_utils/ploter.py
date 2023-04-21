@@ -664,7 +664,7 @@ class Ploter:
         )
         gr_two = ROOT.TGraphErrors(
             nbins,
-            array('d', [x - 0.5 for x in x_list]+[nbins]),
+            array('d', [x - 0.5 for x in x_list] + [nbins]),
             array('d', [0.] * nbins),
             array('d', [0.] * nbins),  # error of x
             array('d', [2.] * nbins)  # error of y

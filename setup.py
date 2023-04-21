@@ -10,4 +10,4 @@ setup(name='root_plot_utils',
       packages=['root_plot_utils'],
       zip_safe=False,
       include_package_data=True
-     )
+      )
