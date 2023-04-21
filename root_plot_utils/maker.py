@@ -29,6 +29,6 @@ def graph_error(name, x, xe, y, ye):
 def unequal_bin_hist(hist_name, bin_list):
     """ create TH1F using a list as x-axis
     """
-    nbins = len(bin_list) -1
+    nbins = len(bin_list) - 1
     h1 = ROOT.TH1F(hist_name, hist_name, nbins, array('f', bin_list))
     return h1
