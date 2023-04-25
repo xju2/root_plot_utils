@@ -348,3 +348,6 @@ class HyperparametersMixin:
             return AttributeDict()
         # prevent any change
         return copy.deepcopy(self._hparams_initial)
+
+    def __str__(self) -> str:
+        return "\n".join([f"{key}: '{value}'" for key, value in self.hparams.items() if key is not None])
