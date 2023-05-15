@@ -1,13 +1,22 @@
-from omegaconf import DictConfig
+from typing import Dict
 import ROOT
 
 class Canvas:
-    def __init__(self, config: DictConfig) -> None:
-        self.config = config
+    def __init__(self,
+                 with_ratio_panel: bool,
+                 size: Dict,
+                 atlas_label: Dict,
+                 other_label: Dict,
+                 legend: Dict) -> None:
+        self.with_ratio_panel = with_ratio_panel
+        self.size = size
+        self.atlas_label = atlas_label
+        self.other_label = other_label
+        self.legend = legend
 
     def create(self, name) -> None:
-        canvas = ROOT.TCanvas(name, name, self.config.size.width, self.config.size.height)
-        if self.config.with_ratio_panel:
+        canvas = ROOT.TCanvas(name, name, self.size.width, self.size.height)
+        if self.with_ratio_panel:
             pad1 = ROOT.TPad("pad1", "pad1", 0, 0.3, 1, 1)
             pad1.SetBottomMargin(0)
             pad1.Draw()
@@ -21,11 +30,11 @@ class Canvas:
             return canvas, None, None
 
     def add_legend(self):
-        x = self.config.legend.x
-        y = self.config.legend.y
-        width = self.config.legend.width
-        height = self.config.legend.height
-        tsize = self.config.legend.text_size
+        x = self.legend.x
+        y = self.legend.y
+        width = self.legend.width
+        height = self.legend.height
+        tsize = self.legend.text_size
 
         legend = ROOT.TLegend(x, y, x + width, y + height)
         legend.SetTextSize(tsize)
@@ -34,11 +43,11 @@ class Canvas:
         return legend
 
     def add_atlas_label(self):
-        text = self.config.atlas_label.get("text", "ATLAS Internal")
-        x = self.config.atlas_label.x
-        y = self.config.atlas_label.y
-        tsize = self.config.atlas_label.text_size
-        color = self.config.atlas_label.color
+        text = self.atlas_label.get("text", "ATLAS Internal")
+        x = self.atlas_label.x
+        y = self.atlas_label.y
+        tsize = self.atlas_label.text_size
+        color = self.atlas_label.color
 
         label = ROOT.TLatex()
         label.SetNDC()
@@ -56,11 +65,11 @@ class Canvas:
             p.DrawLatex(x + delx, y, text)
 
     def add_other_label(self):
-        x = self.config.other_label.x
-        y = self.config.other_label.y
-        tsize = self.config.other_label.text_size
-        color = self.config.other_label.color
-        text = self.config.other_label.text
+        x = self.other_label.x
+        y = self.other_label.y
+        tsize = self.other_label.text_size
+        color = self.other_label.color
+        text = self.other_label.text
 
         label = ROOT.TLatex()
         label.SetNDC()
