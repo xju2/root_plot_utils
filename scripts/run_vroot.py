@@ -26,9 +26,18 @@ def main_function(cfg: DictConfig) -> None:
     if not cfg.get("task"):
         raise ValueError("Task is not specified in the config file.")
 
-    tasks: List[TaskBase] = utils.instantiate_tasks(cfg.task)
-    for task in tasks:
-        task.run()
+    # Instantiate the task
+    task = hydra.utils.instantiate(cfg.task)
+    task.add_canvas(cfg.canvas)
+
+    # histograms
+    histogram_config = cfg.histograms
+    if histogram_config:
+        task.add_histograms(histogram_config)
+    else:
+        logging.info("No histograms are added.")
+
+    task.run()
 
 
 @hydra.main(config_path=root / "configs", config_name="run_task.yaml", version_base="1.2")
