@@ -6,14 +6,14 @@ root = pyrootutils.setup_root(
     pythonpath=True,
     dotenv=True,
 )
-from typing import List
+
 import logging
 from pathlib import Path
 
 import hydra
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
 
-from vroot.task.base import TaskBase
+# from vroot.task.base import TaskBase
 from vroot import utils
 
 @utils.task_wrapper
@@ -28,20 +28,18 @@ def main_function(cfg: DictConfig) -> None:
 
     # Instantiate the task
     task = hydra.utils.instantiate(cfg.task)
-    task.add_canvas(cfg.canvas)
+    canvas = hydra.utils.instantiate(cfg.canvas)
+    task.set_canvas(canvas)
 
     # histograms
-    histogram_config = cfg.histograms
-    if histogram_config:
-        task.add_histograms(histogram_config)
-    else:
-        logging.info("No histograms are added.")
+    task.add_histograms(cfg.histograms)
 
     task.run()
 
 
 @hydra.main(config_path=root / "configs", config_name="run_task.yaml", version_base="1.2")
 def main(cfg: DictConfig) -> None:
+    # print(OmegaConf.to_yaml(cfg))
     main_function(cfg)
 
 if __name__ == "__main__":

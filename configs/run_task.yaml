@@ -4,6 +4,7 @@ defaults:
   - paths: default.yaml
   - extras: default.yaml
   - hydra: default.yaml
+  - histograms: idpvm_efficiencies.yaml
+  - canvas: default.yaml
 
-# task name, determines output directory path
 task_name: ""

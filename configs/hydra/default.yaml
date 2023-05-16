@@ -13,3 +13,7 @@ run:
 sweep:
   dir: ${paths.log_dir}/output/sweeps
   subdir: ${hydra.job.override_dirname}
+
+sweeper:
+  params:
+    histograms: idpvm_efficiencies, idpvm_resolution

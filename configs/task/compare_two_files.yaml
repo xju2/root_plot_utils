@@ -1,0 +1,11 @@
+_target_: vroot.task.compare_two_files.CompareTwoIdentidicalFiles
+reference_file:
+  _target_: vroot.tools.reader.TH1FileHandle
+  path: _data/MyPhysVal_CKF.root
+  name: CKF
+  is_data: false
+comparator_file:
+  _target_: vroot.tools.reader.TH1FileHandle
+  path: _data/MyPhysVal_GNN.root
+  name: GNN
+  is_data: false

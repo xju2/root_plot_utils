@@ -41,3 +41,18 @@ class Histograms:
     def __iadd__(self, other):
         self._histograms.extend(other._histograms)
         return self
+
+    def __iter__(self):
+        return iter(self._histograms)
+
+    def __len__(self):
+        return len(self._histograms)
+
+    def __getitem__(self, index):
+        return self._histograms[index]
+
+    def __str__(self) -> str:
+        outstr = "Total histograms: {:,}\n".format(len(self._histograms))
+        for hist in self._histograms:
+            outstr += "\t" + hist.hparams.histname + "\n"
+        return outstr
