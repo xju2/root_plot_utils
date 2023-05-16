@@ -1,4 +1,5 @@
 _target_: vroot.task.compare_two_files.CompareTwoIdentidicalFiles
+with_ratio: true
 reference_file:
   _target_: vroot.tools.reader.TH1FileHandle
   path: _data/MyPhysVal_CKF.root

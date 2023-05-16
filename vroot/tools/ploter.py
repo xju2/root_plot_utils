@@ -5,12 +5,12 @@ __version__ = "0.1"
 
 import ROOT
 from array import array
-from root_plot_utils import AtlasStyle  # noqa: F401
+from vroot.tools import AtlasStyle  # noqa: F401
 
 import os
 import errno
 
-from root_plot_utils import adder
+from vroot.tools import adder
 
 class Ploter:
     def __init__(self, status="Internal", lumi=36.1):

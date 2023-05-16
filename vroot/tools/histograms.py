@@ -20,6 +20,7 @@ class HistogramOptions(HyperparametersMixin):
 class Histograms:
     def __init__(self, config: DictConfig) -> None:
         self._histograms = []
+        self.config = config
         self.parse_config(config)
 
     def parse_config(self, config: DictConfig) -> None:

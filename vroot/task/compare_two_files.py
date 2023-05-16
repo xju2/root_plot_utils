@@ -12,6 +12,7 @@ class CompareTwoIdentidicalFiles(TaskBase):
     def __init__(self,
                  reference_file: TH1FileHandle,
                  comparator_file: TH1FileHandle,
+                 with_ratio: bool = True,
                  name: str = "CompareTwoIdentidicalFiles",
                  **kwargs) -> None:
         super().__init__()
@@ -24,3 +25,15 @@ class CompareTwoIdentidicalFiles(TaskBase):
         print(self.ref_file)
         print(self.comparator_file)
         print(self.histograms)
+
+        with_ratio = self.hparams.with_ratio
+        for histogram in self.histograms:
+            hist_ref = self.ref_file.read(histogram)
+            hist_comparator = self.comparator_file.read(histogram)
+            canvas, pad1, pad2 = self.canvas.create("canvas", with_ratio)
+            if with_ratio:
+                pass
+            else:
+                hist_ref.Draw("hist")
+                hist_comparator.Draw("hist same")
+

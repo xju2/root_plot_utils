@@ -3,20 +3,18 @@ import ROOT
 
 class Canvas:
     def __init__(self,
-                 with_ratio_panel: bool,
                  size: Dict,
                  atlas_label: Dict,
                  other_label: Dict,
                  legend: Dict) -> None:
-        self.with_ratio_panel = with_ratio_panel
         self.size = size
         self.atlas_label = atlas_label
         self.other_label = other_label
         self.legend = legend
 
-    def create(self, name) -> None:
+    def create(self, name: str, with_ratio: bool) -> None:
         canvas = ROOT.TCanvas(name, name, self.size.width, self.size.height)
-        if self.with_ratio_panel:
+        if with_ratio:
             pad1 = ROOT.TPad("pad1", "pad1", 0, 0.3, 1, 1)
             pad1.SetBottomMargin(0)
             pad1.Draw()
