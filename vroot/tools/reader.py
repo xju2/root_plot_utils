@@ -45,6 +45,9 @@ class TH1FileHandle(HyperparametersMixin):
         if hist_options.ylim is not None:
             th1.GetYaxis().SetRangeUser(*hist_options.ylim)
 
+        if hist_options.rebin is not None and hist_options.rebin > 1:
+            th1.Rebin(hist_options.rebin)
+
         return th1
 
     def read_by_name(self, histname: str) -> ROOT.TH1:
