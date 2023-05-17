@@ -3,6 +3,8 @@ import ROOT
 import random
 import vroot.tools.AtlasStyle   # noqa
 
+from omegaconf import DictConfig
+
 class Canvas:
     def __init__(self,
                  size: Dict,
@@ -81,3 +83,28 @@ class Canvas:
             label.SetTextColor(color)
             label.SetTextSize(tsize)
             label.DrawLatex(x, y, text)
+
+    def update(self, config: DictConfig):
+        if "size" in config:
+            self.size.update(config.size)
+
+        if "atlas_label" in config:
+            self.atlas_label.update(config.atlas_label)
+
+        if "other_label" in config:
+            self.other_label.update(config.other_label)
+
+        if "legend" in config:
+            self.legend.update(config.legend)
+
+    def deepupdate(self, config: DictConfig):
+        copy = Canvas(self.size, self.atlas_label,
+                      self.other_label, self.legend)
+        copy.update(config)
+        return copy
+
+    def __repr__(self):
+        return f"Canvas(size={self.size}, atlas_label={self.atlas_label}, other_label={self.other_label}, legend={self.legend})"
+
+    def __str__(self):
+        return f"Canvas(size={self.size}, atlas_label={self.atlas_label}, other_label={self.other_label}, legend={self.legend})"

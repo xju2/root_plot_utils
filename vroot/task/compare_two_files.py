@@ -26,16 +26,28 @@ class CompareTwoIdentidicalFiles(TaskBase):
         print(self.ref_file)
         print(self.comparator_file)
         print(self.histograms)
+        print(self.canvas)
+
+        # check if canvas needs adjustment
+        if "canvas" in self.histograms.config:
+            self.canvas.update(self.histograms.config["canvas"])
 
         with_ratio = self.hparams.with_ratio
         for histogram in self.histograms:
             hist_ref, hist_ref_copy = self.ref_file.read(histogram)
             hist_comparator, hist_comparator_copy = self.comparator_file.read(histogram)
 
-            canvas, pad1, pad2 = self.canvas.create(with_ratio)
+            # check if canvas needs adjustment for this histogram
+            if "canvas" in histogram.hparams:
+                canvas_cls = self.canvas.deepupdate(histogram.hparams.canvas)
+            else:
+                canvas_cls = self.canvas
+
+            canvas, pad1, pad2 = canvas_cls.create(with_ratio)
             canvas.cd()
 
             histname = Path(histogram.hparams.histname).name
+            is_logy = histogram.hparams.is_logy
 
             hist_ref_copy.SetLineColor(9000)
             hist_ref.SetLineColor(9000)
@@ -48,10 +60,14 @@ class CompareTwoIdentidicalFiles(TaskBase):
 
             if with_ratio:
                 pad1.cd()
+                if is_logy:
+                    pad1.SetLogy()
                 hist_ref_copy.GetYaxis().SetTitleSize(0.065)
                 hist_ref_copy.GetYaxis().SetTitleOffset(0.75)
                 hist_ref_copy.GetYaxis().SetLabelSize(0.06)
             else:
+                if is_logy:
+                    canvas.SetLogy()
                 hist_ref_copy.GetYaxis().SetTitleSize(0.06)
                 hist_ref_copy.GetYaxis().SetLabelSize(0.055)
                 hist_ref_copy.GetXaxis().SetTitleSize(0.06)
@@ -74,6 +90,8 @@ class CompareTwoIdentidicalFiles(TaskBase):
                 ratio = create_ratio(hist_ref_copy, hist_comparator_copy)
                 if histogram.hparams.ratio_ylim is not None:
                     ratio.GetYaxis().SetRangeUser(*histogram.hparams.ratio_ylim)
+                if histogram.hparams.ratio_ylabel is not None:
+                    ratio.GetYaxis().SetTitle(histogram.hparams.ratio_ylabel)
 
                 ratio.Draw("EP")
                 adder.add_line(ratio, 1.0)

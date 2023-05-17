@@ -12,6 +12,7 @@ class HistogramOptions(HyperparametersMixin):
                  ylabel: Optional[str] = None,
                  ylim: Optional[Tuple[float, float]] = None,
                  is_data: bool = False,
+                 is_logy: bool = False,
                  rebin: Optional[int] = None,
                  ratio_ylim: Optional[Tuple[float, float]] = None,
                  ratio_ylabel: Optional[str] = None,
@@ -22,7 +23,11 @@ class HistogramOptions(HyperparametersMixin):
 class Histograms:
     def __init__(self, config: DictConfig) -> None:
         self._histograms = []
-        self.config = config
+        self.config = dict([(key, value)
+                            for key, value in config.items()
+                            if key != "histograms"])
+
+        self.canvas_config = None
         self.parse_config(config)
 
     def parse_config(self, config: DictConfig) -> None:
@@ -32,9 +37,8 @@ class Histograms:
             raise ValueError("No histograms found in the config!")
 
         for hist_cfg in config.histograms:
-            cfg = config.copy()
-            OmegaConf.set_struct(cfg, False)
-            cfg.update(hist_cfg)
+            cfg = OmegaConf.merge(self.config, hist_cfg)
+
             if "histo_dir" in config:
                 cfg.histname = str(Path(config.histo_dir, cfg.histname))
             histo = HistogramOptions(**cfg)
