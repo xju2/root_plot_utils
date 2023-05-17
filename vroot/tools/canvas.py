@@ -1,5 +1,7 @@
 from typing import Dict
 import ROOT
+import random
+import vroot.tools.AtlasStyle   # noqa
 
 class Canvas:
     def __init__(self,
@@ -12,7 +14,9 @@ class Canvas:
         self.other_label = other_label
         self.legend = legend
 
-    def create(self, name: str, with_ratio: bool) -> None:
+    def create(self, with_ratio: bool) -> None:
+        cID = random.randint(1, 10000)
+        name = f"canvas{cID}"
         canvas = ROOT.TCanvas(name, name, self.size.width, self.size.height)
         if with_ratio:
             pad1 = ROOT.TPad("pad1", "pad1", 0, 0.3, 1, 1)
@@ -27,7 +31,7 @@ class Canvas:
         else:
             return canvas, None, None
 
-    def add_legend(self):
+    def create_legend(self):
         x = self.legend.x
         y = self.legend.y
         width = self.legend.width
@@ -40,8 +44,8 @@ class Canvas:
         legend.SetFillStyle(0)
         return legend
 
-    def add_atlas_label(self):
-        text = self.atlas_label.get("text", "ATLAS Internal")
+    def add_atlas_label(self, with_ratio: bool):
+        text = self.atlas_label.text
         x = self.atlas_label.x
         y = self.atlas_label.y
         tsize = self.atlas_label.text_size
@@ -54,7 +58,9 @@ class Canvas:
         label.SetTextSize(tsize)
         label.DrawLatex(x, y, "ATLAS")
         if text is not None:
-            delx = 0.115 * 696 * ROOT.gPad.GetWh() / (472 * ROOT.gPad.GetWw()) * 0.75 * (tsize / 0.05)
+            delx = 0.115 * 696 * ROOT.gPad.GetWh() / (472 * ROOT.gPad.GetWw())
+            if with_ratio:
+                delx = delx * 0.75 * (tsize / 0.05)
             p = ROOT.TLatex()
             p.SetNDC()
             p.SetTextFont(42)
@@ -68,10 +74,10 @@ class Canvas:
         tsize = self.other_label.text_size
         color = self.other_label.color
         text = self.other_label.text
-
-        label = ROOT.TLatex()
-        label.SetNDC()
-        label.SetTextFont(42)
-        label.SetTextColor(color)
-        label.SetTextSize(tsize)
-        label.DrawLatex(x, y, text)
+        if text is not None:
+            label = ROOT.TLatex()
+            label.SetNDC()
+            label.SetTextFont(42)
+            label.SetTextColor(color)
+            label.SetTextSize(tsize)
+            label.DrawLatex(x, y, text)

@@ -1,14 +1,10 @@
-defaults:
-  - default
-
 histo_dir: IDPerformanceMon/Tracks/SelectedGoodTracks
 ylabel: "Track Efficiency"
 ylim: [0.52, 1.01]
-xlabel: null
+ratio_ylim: [0.95, 1.09]
 rebin: 1
 histograms:
   - histname: "trackeff_vs_eta"
     xlim: [-4, 4]
   - histname: "trackeff_vs_pt"
     xlim: [0, 20]
-

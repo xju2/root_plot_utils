@@ -1,6 +1,3 @@
-defaults:
-  - default
-
 histo_dir: IDPerformanceMon/Tracks/SelectedMatchedTracks/Primary
 ratio_ylim: [0.75, 1.45]
 histograms:

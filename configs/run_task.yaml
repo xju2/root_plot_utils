@@ -7,4 +7,4 @@ defaults:
   - histograms: idpvm_efficiencies.yaml
   - canvas: default.yaml
 
-task_name: ""
+task_name: "testing_runs"

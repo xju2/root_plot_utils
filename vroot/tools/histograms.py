@@ -13,6 +13,8 @@ class HistogramOptions(HyperparametersMixin):
                  ylim: Optional[Tuple[float, float]] = None,
                  is_data: bool = False,
                  rebin: Optional[int] = None,
+                 ratio_ylim: Optional[Tuple[float, float]] = None,
+                 ratio_ylabel: Optional[str] = None,
                  **kwargs) -> None:
         super().__init__()
         self.save_hyperparameters()

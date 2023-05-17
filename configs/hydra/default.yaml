@@ -6,8 +6,10 @@ defaults:
   - override job_logging: colorlog
 
 # output directory, generated dynamically on each run
+# no timing, ${now:%Y-%m-%d}_${now:%H-%M-%S}
 run:
-  dir: ${paths.log_dir}/output/${hydra.job.override_dirname}/${now:%Y-%m-%d}_${now:%H-%M-%S}
+  # dir: ${paths.log_dir}/output/${task_name}
+  dir: ${paths.log_dir}/output/${task_name}/${hydra.job.override_dirname}
 
 # output directory for sweep runs
 sweep:

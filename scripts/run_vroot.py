@@ -11,7 +11,7 @@ import logging
 from pathlib import Path
 
 import hydra
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import DictConfig, OmegaConf   # noqa
 
 # from vroot.task.base import TaskBase
 from vroot import utils

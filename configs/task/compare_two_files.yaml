@@ -1,12 +1,13 @@
 _target_: vroot.task.compare_two_files.CompareTwoIdentidicalFiles
-with_ratio: true
+with_ratio: false
 reference_file:
   _target_: vroot.tools.reader.TH1FileHandle
-  path: _data/MyPhysVal_CKF.root
-  name: CKF
+  path: ${paths.data_dir}/MyPhysVal_CKF.root
+  name: CKF Tracking
   is_data: false
 comparator_file:
   _target_: vroot.tools.reader.TH1FileHandle
-  path: _data/MyPhysVal_GNN.root
-  name: GNN
+  path: ${paths.data_dir}/MyPhysVal_GNN.root
+  name: GNN Tracking
   is_data: false
+outdir: ${paths.output_dir}

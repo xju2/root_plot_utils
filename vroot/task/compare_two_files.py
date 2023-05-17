@@ -1,11 +1,11 @@
+from pathlib import Path
+
 from vroot.task.base import TaskBase
 from vroot.utils import get_pylogger
 from vroot.tools.reader import TH1FileHandle
-from vroot.tools.plot_options import PlotOptions
+from vroot.tools.ratio import create_ratio
+from vroot.tools import adder
 
-import ROOT
-# from vroot.tools.ploter import Plotter
-# from vroot.tools.histograms import Histograms
 logger = get_pylogger(__name__)
 
 class CompareTwoIdentidicalFiles(TaskBase):
@@ -13,6 +13,7 @@ class CompareTwoIdentidicalFiles(TaskBase):
                  reference_file: TH1FileHandle,
                  comparator_file: TH1FileHandle,
                  with_ratio: bool = True,
+                 outdir: str = ".",
                  name: str = "CompareTwoIdentidicalFiles",
                  **kwargs) -> None:
         super().__init__()
@@ -28,12 +29,59 @@ class CompareTwoIdentidicalFiles(TaskBase):
 
         with_ratio = self.hparams.with_ratio
         for histogram in self.histograms:
-            hist_ref = self.ref_file.read(histogram)
-            hist_comparator = self.comparator_file.read(histogram)
-            canvas, pad1, pad2 = self.canvas.create("canvas", with_ratio)
-            if with_ratio:
-                pass
-            else:
-                hist_ref.Draw("hist")
-                hist_comparator.Draw("hist same")
+            hist_ref, hist_ref_copy = self.ref_file.read(histogram)
+            hist_comparator, hist_comparator_copy = self.comparator_file.read(histogram)
 
+            canvas, pad1, pad2 = self.canvas.create(with_ratio)
+            canvas.cd()
+
+            histname = Path(histogram.hparams.histname).name
+
+            hist_ref_copy.SetLineColor(9000)
+            hist_ref.SetLineColor(9000)
+            hist_ref.SetMarkerSize(0)
+
+            hist_comparator.SetMarkerColor(9001)
+            hist_comparator.SetLineColor(9001)
+            hist_comparator.SetMarkerStyle(8)
+            hist_comparator.SetMarkerSize(0.9)
+
+            if with_ratio:
+                pad1.cd()
+                hist_ref_copy.GetYaxis().SetTitleSize(0.065)
+                hist_ref_copy.GetYaxis().SetTitleOffset(0.75)
+                hist_ref_copy.GetYaxis().SetLabelSize(0.06)
+            else:
+                hist_ref_copy.GetYaxis().SetTitleSize(0.06)
+                hist_ref_copy.GetYaxis().SetLabelSize(0.055)
+                hist_ref_copy.GetXaxis().SetTitleSize(0.06)
+                hist_ref_copy.GetXaxis().SetLabelSize(0.055)
+
+
+            hist_ref_copy.Draw("hist")
+            hist_ref.Draw("same EP")
+            hist_comparator.Draw("same ep")
+
+            self.canvas.add_atlas_label(with_ratio)
+            legend = self.canvas.create_legend()
+            legend.AddEntry(hist_ref_copy, self.ref_file.hparams.name, "lep")
+            legend.AddEntry(hist_comparator, self.comparator_file.hparams.name, "ep")
+            legend.Draw()
+
+            self.canvas.add_other_label()
+            if with_ratio:
+                pad2.cd()
+                ratio = create_ratio(hist_ref_copy, hist_comparator_copy)
+                if histogram.hparams.ratio_ylim is not None:
+                    ratio.GetYaxis().SetRangeUser(*histogram.hparams.ratio_ylim)
+
+                ratio.Draw("EP")
+                adder.add_line(ratio, 1.0)
+
+            # write the canvas to file
+            outname = histname + "-withratio" if with_ratio else histname
+            if self.canvas.atlas_label.text is not None:
+                outname += f"-{self.canvas.atlas_label.text}"
+            outname += ".pdf"
+            outname = Path(self.hparams.outdir) / outname
+            canvas.SaveAs(str(outname))

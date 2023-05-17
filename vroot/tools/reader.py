@@ -1,12 +1,37 @@
 import warnings
 
-from vroot.tools.plot_options import HistogramOptions
+import numpy as np
+
+from vroot.tools.histograms import HistogramOptions
 from vroot.hparams_mixin import HyperparametersMixin
 from vroot.utils import get_pylogger
 
 import ROOT
+
 logger = get_pylogger(__name__)
 
+def convert_TEfficiency_to_TGraphAsymmErrors(hist: ROOT.TEfficiency) -> ROOT.TGraphAsymmErrors:
+    """Convert TEfficiency to TGraphAsymmErrors"""
+    t_eff_total = hist.GetCopyTotalHisto()
+    n_bins_x = t_eff_total.GetNbinsX()
+
+    # use Clopper-Pearson interval, which is the default for TEfficiency
+    # need to loop through values to get only y-errors
+    bins = np.empty(n_bins_x)
+    vals = np.empty(n_bins_x)
+    xErr = np.zeros(n_bins_x)
+    yErrUp = np.empty(n_bins_x)
+    yErrLo = np.empty(n_bins_x)
+
+    for i in range(1, n_bins_x + 1):
+        bins[i - 1] = t_eff_total.GetBinCenter(i)
+        vals[i - 1] = hist.GetEfficiency(i)
+        yErrUp[i - 1] = hist.GetEfficiencyErrorUp(i)
+        yErrLo[i - 1] = hist.GetEfficiencyErrorLow(i)
+
+    graph = ROOT.TGraphAsymmErrors(n_bins_x, bins, vals, xErr, xErr, yErrLo, yErrUp)
+
+    return graph
 
 class TH1FileHandle(HyperparametersMixin):
     def __init__(self,
@@ -28,33 +53,60 @@ class TH1FileHandle(HyperparametersMixin):
     def __repr__(self) -> str:
         return super().__repr__() + f"({self.hparams.name})"
 
-    def read(self, hist_options: HistogramOptions) -> ROOT.TH1:
+    def read(self, histogram: HistogramOptions) -> ROOT.TH1:
         """Read histogram from file and apply options"""
 
+        hist_options = histogram.hparams
         th1 = self.read_by_name(hist_options.histname)
+        th1_type = type(th1)
+        hist_copy = None
+
+        if th1_type is ROOT.TEfficiency:
+            hist = convert_TEfficiency_to_TGraphAsymmErrors(th1)
+            hist_copy = th1.GetCopyPassedHisto()
+            hist_copy.Divide(th1.GetCopyPassedHisto(), th1.GetCopyTotalHisto(), 1.0, 1.0, "B")
+            hist_copy.SetLineWidth(2)
+        elif th1_type is ROOT.TProfile:
+            hist = th1.ProjectionX()
+        else:
+            hist = th1
 
         if hist_options.xlabel is not None:
-            th1.GetXaxis().SetTitle(hist_options.xlabel)
+            hist.GetXaxis().SetTitle(hist_options.xlabel)
+            if hist_copy:
+                hist_copy.GetXaxis().SetTitle(hist_options.xlabel)
 
         if hist_options.xlim is not None:
-            th1.GetXaxis().SetRangeUser(*hist_options.xlim)
+            hist.GetXaxis().SetRangeUser(*hist_options.xlim)
+            if hist_copy:
+                hist_copy.GetXaxis().SetRangeUser(*hist_options.xlim)
 
         if hist_options.ylabel is not None:
-            th1.GetYaxis().SetTitle(hist_options.ylabel)
+            hist.GetYaxis().SetTitle(hist_options.ylabel)
+            if hist_copy:
+                hist_copy.GetYaxis().SetTitle(hist_options.ylabel)
 
         if hist_options.ylim is not None:
-            th1.GetYaxis().SetRangeUser(*hist_options.ylim)
+            hist.GetYaxis().SetRangeUser(*hist_options.ylim)
+            if hist_copy:
+                hist_copy.GetYaxis().SetRangeUser(*hist_options.ylim)
 
-        if hist_options.rebin is not None and hist_options.rebin > 1:
-            th1.Rebin(hist_options.rebin)
+        if hist_options.rebin is not None and hist_options.rebin > 1 \
+           and type(hist) is ROOT.TH1F:
+            hist.Rebin(hist_options.rebin)
 
-        return th1
+        hist.SetLineWidth(2)
+        if th1_type is ROOT.TEfficiency:
+            return hist, hist_copy
+        else:
+            return hist, hist
 
     def read_by_name(self, histname: str) -> ROOT.TH1:
         th1 = self.file_handle.Get(histname)
         if th1 is None:
             raise RuntimeError(f"Cannot find histogram {histname} in file {self.file_handle.GetName()}")
         th1.SetDirectory(0)
-        if th1.isinstance(ROOT.TH2) or th1.isinstance(ROOT.TH3):
+        if type(th1) is ROOT.TH2 or type(th1) is ROOT.TH3:
             warnings.warn("2D/3D histogram is not supported yet", RuntimeWarning)
+
         return th1
