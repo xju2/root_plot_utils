@@ -36,14 +36,35 @@ class Histograms:
         if "histograms" not in config:
             raise ValueError("No histograms found in the config!")
 
-        for hist_cfg in config.histograms:
-            cfg = OmegaConf.merge(self.config, hist_cfg)
-
+        def create_histogram(in_config):
+            in_cfg = OmegaConf.merge(self.config, in_config)
             if "histo_dir" in config:
-                cfg.histname = str(Path(config.histo_dir, cfg.histname))
-            histo = HistogramOptions(**cfg)
+                in_cfg.histname = str(Path(config.histo_dir, in_cfg.histname))
+            out_histo = HistogramOptions(**in_cfg)
+            self._histograms.append(out_histo)
 
-            self._histograms.append(histo)
+        for hist_cfg in config.histograms:
+            histname = hist_cfg.histname
+
+            if isinstance(histname, list):
+                # multiple histograms per config
+                # check all histograms have the same length
+                if not all([len(histname) == len(value)
+                            for key, value in hist_cfg.items()]):
+                    # find the key with the wrong length
+                    for key, value in hist_cfg.items():
+                        if len(value) != len(histname):
+                            raise ValueError(f"Length of `{key}` "
+                                             f"is not the same as histnames {histname[0]}!")
+
+                for idx in range(len(histname)):
+                    cfg = OmegaConf.create(dict([(key, value[idx])
+                                                 for key, value in hist_cfg.items()]))
+                    create_histogram(cfg)
+
+            elif isinstance(histname, str):
+                # single histogram per config
+                create_histogram(hist_cfg)
 
     def __iadd__(self, other):
         self._histograms.extend(other._histograms)

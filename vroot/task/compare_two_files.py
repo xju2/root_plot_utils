@@ -43,7 +43,12 @@ class CompareTwoIdentidicalFiles(TaskBase):
             else:
                 canvas_cls = self.canvas
 
-            canvas, pad1, pad2 = canvas_cls.create(with_ratio)
+            if "with_ratio" in histogram.hparams:
+                with_ratio_this = histogram.hparams.with_ratio
+            else:
+                with_ratio_this = with_ratio
+
+            canvas, pad1, pad2 = canvas_cls.create(with_ratio_this)
             canvas.cd()
 
             histname = Path(histogram.hparams.histname).name
@@ -58,7 +63,7 @@ class CompareTwoIdentidicalFiles(TaskBase):
             hist_comparator.SetMarkerStyle(8)
             hist_comparator.SetMarkerSize(0.9)
 
-            if with_ratio:
+            if with_ratio_this:
                 pad1.cd()
                 if is_logy:
                     pad1.SetLogy()
@@ -78,14 +83,14 @@ class CompareTwoIdentidicalFiles(TaskBase):
             hist_ref.Draw("same EP")
             hist_comparator.Draw("same ep")
 
-            self.canvas.add_atlas_label(with_ratio)
+            self.canvas.add_atlas_label(with_ratio_this)
             legend = self.canvas.create_legend()
             legend.AddEntry(hist_ref_copy, self.ref_file.hparams.name, "lep")
             legend.AddEntry(hist_comparator, self.comparator_file.hparams.name, "ep")
             legend.Draw()
 
             self.canvas.add_other_label()
-            if with_ratio:
+            if with_ratio_this:
                 pad2.cd()
                 ratio = create_ratio(hist_ref_copy, hist_comparator_copy)
                 if histogram.hparams.ratio_ylim is not None:
@@ -97,7 +102,7 @@ class CompareTwoIdentidicalFiles(TaskBase):
                 adder.add_line(ratio, 1.0)
 
             # write the canvas to file
-            outname = histname + "-withratio" if with_ratio else histname
+            outname = histname + "-withratio" if with_ratio_this else histname
             if self.canvas.atlas_label.text is not None:
                 outname += f"-{self.canvas.atlas_label.text}"
             outname += ".pdf"
