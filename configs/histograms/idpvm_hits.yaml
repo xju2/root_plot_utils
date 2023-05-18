@@ -1,0 +1,21 @@
+histo_dir: IDPerformanceMon/Tracks/SelectedMatchedTracks
+ratio_ylim: [0.8, 1.13]
+
+histograms:
+  - histname: HitContent_vs_eta_NPixelHits
+    ylabel: "N_{hits, Pixel}"
+    ylim: [-0.65, 25]
+    ratio_ylim: [0.94, 1.065]
+
+  - histname: HitContent_vs_eta_NSCTHits
+    ylabel: "N_{hits, Strip}"
+    ylim: [-0.65, 20]
+    r
+
+  - histname: HitContent_vs_eta_NPixelHoles
+    ylabel: "N_{holes, Pixel}"
+    ylim: [-0.65, 5]
+
+  - histname: HitContent_vs_eta_NSCTHoles
+    ylabel: "N_{holes, Strip}"
+    ylim: [-0.65, 5]
