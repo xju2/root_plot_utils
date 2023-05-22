@@ -10,7 +10,6 @@ histograms:
   - histname: HitContent_vs_eta_NSCTHits
     ylabel: "N_{hits, Strip}"
     ylim: [-0.65, 20]
-    r
 
   - histname: HitContent_vs_eta_NPixelHoles
     ylabel: "N_{holes, Pixel}"
