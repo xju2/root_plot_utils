@@ -4,6 +4,7 @@ from pathlib import Path
 from vroot.hparams_mixin import HyperparametersMixin
 from omegaconf import DictConfig, OmegaConf
 
+from vroot.tools.reader import TH1FileHandle
 from vroot.utils import get_pylogger
 
 log = get_pylogger(__name__)
@@ -94,3 +95,10 @@ class Histograms:
         for hist in self._histograms:
             outstr += "\t" + hist.hparams.histname + "\n"
         return outstr
+
+    def read(self, file_handle: TH1FileHandle):
+        """Get all histograms from the file."""
+        histogram_names = file_handle.get_all_histogram_names()
+        self._histograms = [HistogramOptions(histname=histname)
+                            for histname in histogram_names]
+        log.info("Read {:,} histograms from the file".format(len(self._histograms)))

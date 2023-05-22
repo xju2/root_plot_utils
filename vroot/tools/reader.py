@@ -1,4 +1,6 @@
 import warnings
+from typing import List
+from pathlib import Path
 
 import numpy as np
 
@@ -110,3 +112,33 @@ class TH1FileHandle(HyperparametersMixin):
             warnings.warn("2D/3D histogram is not supported yet", RuntimeWarning)
 
         return th1
+
+    def get_all_histogram_names(self) -> List[str]:
+        """Get all histogram names in this file"""
+        all_objects = {}
+
+        def read_directory(directory):
+            directory.cd()
+            for key in directory.GetListOfKeys():
+                obj = key.ReadObj()
+                if isinstance(obj, ROOT.TDirectory):
+                    read_directory(obj)
+                else:
+                    class_name = obj.ClassName()
+                    if class_name not in all_objects:
+                        all_objects[class_name] = []
+
+                    name = Path(key.GetMotherDir().GetPath()) / obj.GetName()
+                    name = str(name).split(":")[-1]
+                    all_objects[class_name].append(name)
+
+        read_directory(self.file_handle)
+
+        # summarize the file contents
+        all_names = []
+        for class_name, names in all_objects.items():
+            logger.info(f"Found {len(names)} {class_name} objects")
+            if class_name != "TTree":
+                all_names.extend(names)
+
+        return all_names
