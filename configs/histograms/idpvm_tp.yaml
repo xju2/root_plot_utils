@@ -23,6 +23,6 @@ histograms:
     ratio_ylim: ${gen_list:[0.5, 4], 5}
 
   - histname: ${ex_ctp:"reco_", ${histograms.track_names}}
-    ratio_ylim: ${eval:'[0.75, 2] * 5'}
+    ratio_ylim: ${gen_list:[0.75, 2], 5}
 
   - histname: ${ex_ctp:"sigma_", ${histograms.track_names}}
