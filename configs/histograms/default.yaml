@@ -1,2 +1,2 @@
 track_names: "d0, z0, qoverp, z0sin, pt"
-histograms: "all"
+use_all_histograms: false

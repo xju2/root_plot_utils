@@ -4,6 +4,10 @@ from pathlib import Path
 from vroot.hparams_mixin import HyperparametersMixin
 from omegaconf import DictConfig, OmegaConf
 
+from vroot.utils import get_pylogger
+
+log = get_pylogger(__name__)
+
 class HistogramOptions(HyperparametersMixin):
     def __init__(self,
                  histname: str,
@@ -26,15 +30,20 @@ class Histograms:
         self.config = dict([(key, value)
                             for key, value in config.items()
                             if key != "histograms"])
+        self.use_all = self.config.pop("use_all_histograms", False)
+        if self.use_all:
+            log.info("Using all histograms in the file")
 
-        self.canvas_config = None
         self.parse_config(config)
 
     def parse_config(self, config: DictConfig) -> None:
         """Parse the config"""
 
         if "histograms" not in config:
-            raise ValueError("No histograms found in the config!")
+            if self.use_all:
+                return
+            else:
+                raise ValueError("No histograms found in the config!")
 
         def create_histogram(in_config):
             in_cfg = OmegaConf.merge(self.config, in_config)
@@ -55,7 +64,8 @@ class Histograms:
                     for key, value in hist_cfg.items():
                         if len(value) != len(histname):
                             raise ValueError(f"Length of `{key}` "
-                                             f"is not the same as histnames {histname[0]}!")
+                                             "is not the same as histnames "
+                                             f"{histname[0]}, {len(histname)}")
 
                 for idx in range(len(histname)):
                     cfg = OmegaConf.create(dict([(key, value[idx])
