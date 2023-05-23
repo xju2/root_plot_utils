@@ -351,3 +351,6 @@ class HyperparametersMixin:
 
     def __str__(self) -> str:
         return "\n".join([f"{key}: '{value}'" for key, value in self.hparams.items() if key is not None])
+
+    def __repr__(self) -> str:
+        return str(self)

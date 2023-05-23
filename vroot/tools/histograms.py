@@ -4,7 +4,6 @@ from pathlib import Path
 from vroot.hparams_mixin import HyperparametersMixin
 from omegaconf import DictConfig, OmegaConf
 
-from vroot.tools.reader import TH1FileHandle
 from vroot.utils import get_pylogger
 
 log = get_pylogger(__name__)
@@ -24,6 +23,18 @@ class HistogramOptions(HyperparametersMixin):
                  **kwargs) -> None:
         super().__init__()
         self.save_hyperparameters()
+
+    def __eq__(self, other) -> bool:
+        return self.hparams.histname == other.hparams.histname
+
+    def __gt__(self, other) -> bool:
+        return self.hparams.histname >= other.hparams.histname
+
+    def __str__(self) -> str:
+        return "HistogramOptions:\n" + super().__str__()
+
+    def __repr__(self) -> str:
+        return str(self)
 
 class Histograms:
     def __init__(self, config: DictConfig) -> None:
@@ -96,9 +107,22 @@ class Histograms:
             outstr += "\t" + hist.hparams.histname + "\n"
         return outstr
 
-    def read(self, file_handle: TH1FileHandle):
+    def get_all_histograms(self, file_handle):
         """Get all histograms from the file."""
         histogram_names = file_handle.get_all_histogram_names()
-        self._histograms = [HistogramOptions(histname=histname)
-                            for histname in histogram_names]
+        all_histograms = [HistogramOptions(histname=histname)
+                          for histname in histogram_names]
+        if self._histograms:
+            # merge the existing histogram configurations with the
+            # default ones
+            self.merge(all_histograms)
+        else:
+            self._histograms = all_histograms
         log.info("Read {:,} histograms from the file".format(len(self._histograms)))
+
+    def merge(self, other):
+        """Merge the histograms in `other` with the existing ones."""
+        for hist in other:
+            if hist not in self._histograms:
+                self._histograms.append(hist)
+                log.info("Added histogram: {}".format(hist.hparams.histname))
