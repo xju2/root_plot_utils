@@ -4,7 +4,7 @@ defaults:
   - paths: default.yaml
   - extras: default.yaml
   - hydra: default.yaml
-  - histograms: idpvm_efficiencies.yaml
   - canvas: default.yaml
+  - histograms: idpvm_efficiencies.yaml
 
 task_name: "testing_runs"

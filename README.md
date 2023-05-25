@@ -16,3 +16,9 @@ or compare them with ratio panel
 ```bash
 python scripts/run_vroot.py task_name=ckf_vs_gnn task=compare_two_files task.with_ratio=true canvas=with_ratio histograms=idpvm_resolution
 ```
+
+To run all histograms
+```bash
+python scripts/run_vroot.py -m task_name=ckf_vs_gnn task=compare_two_files task.with_ratio=true canvas=with_ratio
+```
+```

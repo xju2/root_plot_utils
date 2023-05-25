@@ -1,5 +1,16 @@
+defaults:
+  - default
+  - _self_
+
 histo_dir: IDPerformanceMon/Tracks/SelectedMatchedTracks
 ratio_ylim: [0.8, 1.13]
+canvas:
+  atlas_label:
+    y: 0.8
+  other_label:
+    y: 0.725
+  legend:
+    y: 0.55
 
 histograms:
   - histname: HitContent_vs_eta_NPixelHits
@@ -17,4 +28,8 @@ histograms:
 
   - histname: HitContent_vs_eta_NSCTHoles
     ylabel: "N_{holes, Strip}"
-    ylim: [-0.65, 5]
+    ylim: [0.001, 2]
+
+  - histname: HitContent_vs_eta_NSCTDoubleHoles
+    ylabel: "N_{double holes, Strip}"
+    ylim: [0.001, 0.25]

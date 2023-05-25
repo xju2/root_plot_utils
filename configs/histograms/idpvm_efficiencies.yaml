@@ -1,3 +1,7 @@
+defaults:
+  - default
+  - _self_
+
 histo_dir: IDPerformanceMon/Tracks/SelectedGoodTracks
 ylabel: "Track Efficiency"
 ylim: [0.52, 1.01]
