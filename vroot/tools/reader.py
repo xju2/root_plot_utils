@@ -105,7 +105,7 @@ class TH1FileHandle(HyperparametersMixin):
 
     def read_by_name(self, histname: str) -> ROOT.TH1:
         th1 = self.file_handle.Get(histname)
-        if th1 is None:
+        if th1 is None or type(th1) is ROOT.TObject:
             raise RuntimeError(f"Cannot find histogram {histname} in file {self.file_handle.GetName()}")
         th1.SetDirectory(0)
         if type(th1) is ROOT.TH2 or type(th1) is ROOT.TH3:
