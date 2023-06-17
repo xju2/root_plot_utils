@@ -7,7 +7,7 @@ from vroot.tools.reader import TH1FileHandle
 
 logger = get_pylogger(__name__)
 
-class PlotOneFile(TaskBase):
+class PlotHistogramsInOneFile(TaskBase):
     def __init__(self,
                  filehandle: TH1FileHandle,
                  outdir: str = ".",
