@@ -1,0 +1,9 @@
+_target_: vroot.task.plot_one_file.PlotHistogramsInOneFile
+
+filehandle:
+  _target_: vroot.tools.reader.TH1FileHandle
+  path: ${paths.data_dir}/MyPhysVal_CKF.root
+  name: CKF Tracking
+  is_data: false
+
+outdir: ${paths.output_dir}
