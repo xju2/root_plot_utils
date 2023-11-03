@@ -15,9 +15,8 @@ canvas:
   legend:
     y: 0.55
 
-track_latex_names: "d_{0}, z_{0}, q/p_{T}, z_{0}sin#theta, p_{T}"
 histograms:
-  - histname: ${ex_ctp:"tailfrac_vs_eta_", ${histograms.track_names}}
-    xlim: ${gen_list:[-4, 4], 5}
-    xlabel: ${gen_list:"#eta^{true}", 5}
-    ylabel: ${ex_ctp:"Tail Fraction in ", ${histograms.track_latex_names}}
+  - histname: ${gen_str:"tailfrac_vs_eta_{}", ${histograms.track_names}}
+    xlim: ${gen_list:[-4, 4], ${histograms.num_track_names}}
+    xlabel: ${gen_list:"#eta^{true}", ${histograms.num_track_names}}
+    ylabel: ${gen_str:"Tail Fraction in {}", ${histograms.track_latex_names}}
