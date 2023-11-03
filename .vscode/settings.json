@@ -2,7 +2,5 @@
     "files.associations": {
         "AtlasStyle.C": "cpp"
     },
-    "python.linting.flake8Enabled": true,
-    "python.linting.enabled": true,
     "files.trimTrailingWhitespace": true
 }
