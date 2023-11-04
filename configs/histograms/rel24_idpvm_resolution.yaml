@@ -24,11 +24,6 @@ histograms:
   - histname: ${gen_str:"resolution_vs_pt_{}", ${histograms.track_names}}
     ylim: [[0, 400], [10, 2500], [0, 500], [0.008, 0.05]]
 
-  # - histname: ${gen_str:"pull_{}", ${histograms.track_names}}
-  #   ylim: [[0, 60], [0, 50], [0, 100], [0, 40], [0, 100]]
-  #   xlim: [[-5, 5], [-10, 10], [-0.001, 0.001], [-3, 3], [-10, 10]]
-  #   ratio_ylim: ${gen_list:[0.75, 2], ${histograms.num_track_names}}
-
   - histname: ${gen_str:"pull_{}", ${histograms.track_names}}
     ylim: [[0, 200], [0, 400], [0, 150], [0, 400]]
     ratio_ylim: ${gen_list:[0.5, 4], ${histograms.num_track_names}}
