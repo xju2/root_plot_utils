@@ -9,12 +9,12 @@ defaults:
 # no timing, ${now:%Y-%m-%d}_${now:%H-%M-%S}
 run:
   # dir: ${paths.log_dir}/output/${task_name}
-  dir: ${paths.log_dir}/output/${task_name}/${hydra.job.override_dirname}
+  dir: ${paths.log_dir}/output/${task_name}/${now:%Y-%m-%d}_${now:%H-%M-%S}
 
 # output directory for sweep runs
 sweep:
-  dir: ${paths.log_dir}/output/sweeps
-  subdir: ${hydra.job.override_dirname}
+  dir: ${paths.log_dir}/${task_name}/multiruns/${now:%Y-%m-%d}_${now:%H-%M-%S}
+  subdir: ${hydra.job.num}
 
 sweeper:
   params:
