@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Tuple, Optional
 
 from pathlib import Path
@@ -11,16 +12,18 @@ log = get_pylogger(__name__)
 class HistogramOptions(HyperparametersMixin):
     def __init__(self,
                  histname: str,
-                 xlabel: Optional[str] = None,
-                 xlim: Optional[Tuple[float, float]] = None,
-                 ylabel: Optional[str] = None,
-                 ylim: Optional[Tuple[float, float]] = None,
+                 xlabel: str | None = None,
+                 xlim: tuple[float, float] | None = None,
+                 ylabel: str | None = None,
+                 ylim: tuple[float, float] | None = None,
                  is_data: bool = False,
                  is_logy: bool = False,
-                 rebin: Optional[int] = None,
+                 rebin: int | None = None,
                  ratio_ylim: Optional[Tuple[float, float]] = None,
                  ratio_ylabel: Optional[str] = None,
-                 **kwargs) -> None:
+                 density: bool = False,
+                 **kwargs  # ignore other options
+                 ) -> None:
         super().__init__()
         self.save_hyperparameters()
 

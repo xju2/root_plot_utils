@@ -6,6 +6,7 @@ histo_dir: SquirrelPlots/${histograms.track_dir_name}/Tracks/Selected/Parameters
 ylabel: Tracks
 ratio_ylim: [0.75, 2]
 with_ratio: false
+density: true
 
 canvas:
   atlas_label:

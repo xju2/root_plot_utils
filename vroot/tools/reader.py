@@ -94,8 +94,13 @@ class TH1FileHandle(HyperparametersMixin):
                 hist_copy.GetYaxis().SetRangeUser(*hist_options.ylim)
 
         if hist_options.rebin is not None and hist_options.rebin > 1 \
-           and type(hist) is ROOT.TH1F:
+           and isinstance(hist, ROOT.TH1):
             hist.Rebin(hist_options.rebin)
+
+        if hist_options.density and isinstance(hist, ROOT.TH1):
+            hist.Sumw2()
+            hist.Scale(1.0 / hist.Integral())
+            hist.GetYaxis().SetTitle("Density")
 
         hist.SetLineWidth(2)
         if th1_type is ROOT.TEfficiency:
