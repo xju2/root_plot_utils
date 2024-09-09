@@ -1,5 +1,5 @@
 _target_: vroot.tools.canvas.Canvas
-otype: png
+otype: pdf
 size:
   width: 800
   height: 600
