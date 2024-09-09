@@ -105,6 +105,6 @@ class CompareTwoIdentidicalFiles(TaskBase):
             outname = histname + "-withratio" if with_ratio_this else histname
             if self.canvas.atlas_label.text is not None:
                 outname += f"-{self.canvas.atlas_label.text}"
-            outname += ".pdf"
+            outname += f".{self.canvas.otype}"
             outname = Path(self.hparams.outdir) / outname
             canvas.SaveAs(str(outname))

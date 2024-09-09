@@ -7,10 +7,12 @@ from omegaconf import DictConfig
 
 class Canvas:
     def __init__(self,
+                 otype: str,
                  size: Dict,
                  atlas_label: Dict,
                  other_label: Dict,
                  legend: Dict) -> None:
+        self.otype = otype
         self.size = size
         self.atlas_label = atlas_label
         self.other_label = other_label

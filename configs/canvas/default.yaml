@@ -1,4 +1,5 @@
 _target_: vroot.tools.canvas.Canvas
+otype: png
 size:
   width: 800
   height: 600
