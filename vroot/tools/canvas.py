@@ -3,16 +3,22 @@ import ROOT
 import random
 import vroot.tools.AtlasStyle   # noqa
 
+
 from omegaconf import DictConfig
 
 class Canvas:
     def __init__(self,
-                 otype: str,
+                 otypes: str | list[str],
                  size: Dict,
                  atlas_label: Dict,
                  other_label: Dict,
                  legend: Dict) -> None:
-        self.otype = otype
+        if isinstance(otypes, list):
+            self.otypes = otypes
+        elif "," in otypes:
+            self.otypes = otypes.split(",")
+        else:
+            self.otypes = [otypes]
         self.size = size
         self.atlas_label = atlas_label
         self.other_label = other_label
@@ -100,7 +106,7 @@ class Canvas:
             self.legend.update(config.legend)
 
     def deepupdate(self, config: DictConfig):
-        copy = Canvas(self.size, self.atlas_label,
+        copy = Canvas(self.otypes, self.size, self.atlas_label,
                       self.other_label, self.legend)
         copy.update(config)
         return copy
@@ -110,3 +116,7 @@ class Canvas:
 
     def __str__(self):
         return f"Canvas(size={self.size}, atlas_label={self.atlas_label}, other_label={self.other_label}, legend={self.legend})"
+
+    def save(self, canvas: ROOT.TCanvas, outname: str) -> None:
+        for otype in self.otypes:
+            canvas.SaveAs(f"{outname}.{otype}")
