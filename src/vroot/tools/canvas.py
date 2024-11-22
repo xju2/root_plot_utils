@@ -3,16 +3,18 @@ import random
 import ROOT
 from omegaconf import DictConfig
 
-import vroot.tools.AtlasStyle  # noqa: F401
+import vroot.tools.AtlasStyle
 
 
 class Canvas:
-    def __init__(self,
-                 otypes: str | list[str],
-                 size: dict,
-                 atlas_label: dict,
-                 other_label: dict,
-                 legend: dict) -> None:
+    def __init__(
+        self,
+        otypes: str | list[str],
+        size: dict,
+        atlas_label: dict,
+        other_label: dict,
+        legend: dict,
+    ) -> None:
         if isinstance(otypes, list):
             self.otypes = otypes
         elif "," in otypes:
@@ -23,10 +25,11 @@ class Canvas:
         self.atlas_label = atlas_label
         self.other_label = other_label
         self.legend = legend
+        self.cid = 0
 
     def create(self, with_ratio: bool) -> None:
-        cID = random.randint(1, 10000)
-        name = f"canvas{cID}"
+        name = f"canvas{self.cid}"
+        self.cid += 1
         canvas = ROOT.TCanvas(name, name, self.size.width, self.size.height)
         if with_ratio:
             pad1 = ROOT.TPad("pad1", "pad1", 0, 0.3, 1, 1)
@@ -105,8 +108,7 @@ class Canvas:
             self.legend.update(config.legend)
 
     def deepupdate(self, config: DictConfig):
-        copy = Canvas(self.otypes, self.size, self.atlas_label,
-                      self.other_label, self.legend)
+        copy = Canvas(self.otypes, self.size, self.atlas_label, self.other_label, self.legend)
         copy.update(config)
         return copy
 

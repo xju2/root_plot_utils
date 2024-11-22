@@ -8,19 +8,21 @@ from vroot.utils import get_pylogger
 
 logger = get_pylogger(__name__)
 
+
 class CompareTwoIdentidicalFiles(TaskBase):
-    def __init__(self,
-                 reference_file: TH1FileHandle,
-                 comparator_file: TH1FileHandle,
-                 with_ratio: bool = True,
-                 outdir: str = ".",
-                 name: str = "CompareTwoIdentidicalFiles",
-                 **kwargs) -> None:
+    def __init__(
+        self,
+        reference_file: TH1FileHandle,
+        comparator_file: TH1FileHandle,
+        with_ratio: bool = True,
+        outdir: str = ".",
+        name: str = "CompareTwoIdentidicalFiles",
+        **kwargs,
+    ) -> None:
         super().__init__()
         self.save_hyperparameters(ignore=["reference_file", "comparator_file"])
         self.ref_file = reference_file
         self.comparator_file = comparator_file
-        # self.plotter = Plotter()
 
     def run(self) -> None:
         print(self.ref_file)
@@ -77,7 +79,6 @@ class CompareTwoIdentidicalFiles(TaskBase):
                 hist_ref_copy.GetYaxis().SetLabelSize(0.055)
                 hist_ref_copy.GetXaxis().SetTitleSize(0.06)
                 hist_ref_copy.GetXaxis().SetLabelSize(0.055)
-
 
             hist_ref_copy.Draw("hist")
             hist_ref.Draw("same EP")

@@ -10,7 +10,7 @@
 #include "TROOT.h"
 
 
-TStyle* AtlasStyle() 
+TStyle* AtlasStyle()
 {
   TStyle *atlasStyle = new TStyle("ATLAS","Atlas style");
 
@@ -51,7 +51,7 @@ TStyle* AtlasStyle()
   atlasStyle->SetTitleFont(font,"y");
   atlasStyle->SetLabelFont(font,"z");
   atlasStyle->SetTitleFont(font,"z");
-  
+
   atlasStyle->SetLabelSize(tsize,"x");
   atlasStyle->SetTitleSize(tsize,"x");
   atlasStyle->SetLabelSize(tsize,"y");
@@ -65,7 +65,7 @@ TStyle* AtlasStyle()
   atlasStyle->SetHistLineWidth(2.);
   atlasStyle->SetLineStyleString(2,"[12 12]"); // postscript dashes
 
-  // get rid of X error bars 
+  // get rid of X error bars
   //atlasStyle->SetErrorX(0.001);
   // get rid of error bar caps
   atlasStyle->SetEndErrorSize(0.);
@@ -92,6 +92,7 @@ void SetAtlasStyle ()
   if ( atlasStyle==0 ) atlasStyle = AtlasStyle();
   gROOT->SetStyle("ATLAS");
   gROOT->ForceStyle();
+  std:cout << "\n... ATLAS style settings applied.\n" << std::endl ;
 }
 
 #endif

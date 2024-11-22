@@ -10,8 +10,9 @@ from vroot.utils import get_pylogger
 
 logger = get_pylogger(__name__)
 
+
 def convert_TEfficiency_to_TGraphAsymmErrors(hist: ROOT.TEfficiency) -> ROOT.TGraphAsymmErrors:
-    """Convert TEfficiency to TGraphAsymmErrors"""
+    """Convert TEfficiency to TGraphAsymmErrors."""
     t_eff_total = hist.GetCopyTotalHisto()
     n_bins_x = t_eff_total.GetNbinsX()
 
@@ -33,11 +34,9 @@ def convert_TEfficiency_to_TGraphAsymmErrors(hist: ROOT.TEfficiency) -> ROOT.TGr
 
     return graph
 
+
 class TH1FileHandle(HyperparametersMixin):
-    def __init__(self,
-                 path: str,
-                 name: str,
-                 is_data: bool):
+    def __init__(self, path: str, name: str, is_data: bool):
         super().__init__()
         self.save_hyperparameters()
 
@@ -53,7 +52,7 @@ class TH1FileHandle(HyperparametersMixin):
         return super().__repr__() + f"({self.hparams.name})"
 
     def read(self, histogram: HistogramOptions) -> ROOT.TH1:
-        """Read histogram from file and apply options"""
+        """Read histogram from file and apply options."""
         hist_options = histogram.hparams
         th1 = self.read_by_name(hist_options.histname)
         th1_type = type(th1)
@@ -89,8 +88,7 @@ class TH1FileHandle(HyperparametersMixin):
             if hist_copy:
                 hist_copy.GetYaxis().SetRangeUser(*hist_options.ylim)
 
-        if hist_options.rebin is not None and hist_options.rebin > 1 \
-           and isinstance(hist, ROOT.TH1):
+        if hist_options.rebin is not None and hist_options.rebin > 1 and isinstance(hist, ROOT.TH1):
             hist.Rebin(hist_options.rebin)
 
         if hist_options.density and isinstance(hist, ROOT.TH1):
@@ -106,15 +104,17 @@ class TH1FileHandle(HyperparametersMixin):
     def read_by_name(self, histname: str) -> ROOT.TH1:
         th1 = self.file_handle.Get(histname)
         if th1 is None or type(th1) is ROOT.TObject:
-            raise RuntimeError(f"Cannot find histogram {histname} in file {self.file_handle.GetName()}")
+            raise RuntimeError(
+                f"Cannot find histogram {histname} in file {self.file_handle.GetName()}"
+            )
         th1.SetDirectory(0)
         if type(th1) is ROOT.TH2 or type(th1) is ROOT.TH3:
-            warnings.warn("2D/3D histogram is not supported yet", RuntimeWarning)
+            warnings.warn("2D/3D histogram is not supported yet", RuntimeWarning, stacklevel=2)
 
         return th1
 
     def get_all_histogram_names(self) -> list[str]:
-        """Get all histogram names in this file"""
+        """Get all histogram names in this file."""
         all_objects = {}
 
         def read_directory(directory):

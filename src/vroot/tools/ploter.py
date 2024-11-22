@@ -4,11 +4,12 @@ __version__ = "0.1"
 import errno
 import os
 from array import array
+from pathlib import Path
 
 import ROOT
 
 from vroot.tools import (
-    AtlasStyle,  # noqa: F401
+    AtlasStyle,
     adder,
 )
 
@@ -52,9 +53,7 @@ class Ploter:
 
         self.totalObj = []
 
-
     def prepare_2pad_canvas(self, cname, width=600, height=600):
-
         self.can = ROOT.TCanvas(cname, cname, width, height)
         self.pad1 = ROOT.TPad("p1_" + cname, cname, 0.0, self.VerticalCanvasSplit, 1.0, 1.0)
         self.pad2 = ROOT.TPad("p2_" + cname, cname, 0.0, 0.0, 1.0, self.VerticalCanvasSplit)
@@ -71,11 +70,23 @@ class Ploter:
         self.pad1.Draw()
         self.pad2.Draw()
 
-    def add_ratio_panel(self, hist_list, y_title,
-                        y_min, y_max, reverse=False):
-        """hist_list = [Data, MC1, MC2]
-        plot Data/MC1, Data/MC2
-        @para=reverse, plot MC1/Data
+    def add_ratio_panel(
+        self, hist_list: list[ROOT.TH1], y_title: str, y_min: float, y_max: float, reverse=False
+    ):
+        """Add a ratio panel to the canvas. Default is Data/MC. If reverse is True, then MC/Data.
+
+        Parameters
+        ----------
+        hist_list : list[ROOT.TH1]
+            A list of histograms to be compared.
+        y_title : str
+            Title of the y-axis.
+        y_min : float
+            Minimum value of the y-axis.
+        y_max : float
+            Maximum value of the y-axis.
+        reverse : bool, optional
+            If True, then the ratio is MC/Data. Default is False.
         """
         self.add_ratio = True
         # y_title = "Data/MC"
@@ -122,7 +133,6 @@ class Ploter:
             y_min = y_min_auto * 0.99
 
         for i, hist in enumerate(hist_list_cp):
-
             if hist.GetSumw2 is None:
                 hist.Sumw2(True)
             if i == 0:
@@ -131,7 +141,7 @@ class Ploter:
                 hist.SetFillStyle(3010)
                 hist.SetMarkerSize(0.001)
 
-                labelscalefact = 1. / (1. - self.VerticalCanvasSplit + 0.1)
+                labelscalefact = 1.0 / (1.0 - self.VerticalCanvasSplit + 0.1)
                 # labelscalefact = 1.0
                 hist.GetYaxis().SetTitle(y_title)
                 hist.GetYaxis().SetTitleSize(self.t_size * labelscalefact)
@@ -144,7 +154,6 @@ class Ploter:
                 hist.GetXaxis().SetTitleSize(self.x_title_size * labelscalefact)
                 hist.GetXaxis().SetLabelOffset(0.04)
                 hist.GetXaxis().SetTitleOffset(1.2)
-
 
                 hist.Draw("AXIS")
             else:
@@ -167,9 +176,9 @@ class Ploter:
                 # this_hist.Draw("EP SAME")
         adder.add_line(h_refer, 1.0)
 
-
-    def stack_hists(self, hist_list, tag_list, out_name,
-                    x_title, y_title, is_log=False, has_data=True):
+    def stack_hists(
+        self, hist_list, tag_list, out_name, x_title, y_title, is_log=False, has_data=True
+    ):
         # not saving the plots..
 
         # In hist_list, the data should be first element, if has_data
@@ -233,19 +242,16 @@ class Ploter:
             y_max = max(y_max, h_data.GetMaximum())
             y_min = min(y_min, h_data.GetMinimum())
 
-        if has_data:
-            this_hist = h_data
-        else:
-            this_hist = hs
+        this_hist = h_data if has_data else hs
 
         if is_log:
             if self.add_ratio:
                 self.pad1.SetLogy()
             else:
                 self.can.SetLogy()
-            this_hist.GetYaxis().SetRangeUser(4E-3, y_max * 1e3)
+            this_hist.GetYaxis().SetRangeUser(4e-3, y_max * 1e3)
         else:
-            this_hist.GetYaxis().SetRangeUser(1E-3, y_max * 1.1)
+            this_hist.GetYaxis().SetRangeUser(1e-3, y_max * 1.1)
 
         # this_hist.SetNdivisions(8, "X")
         this_hist.SetXTitle(x_title)
@@ -260,18 +266,14 @@ class Ploter:
             hs.Draw("HIST")
 
         # add legend
-        hist_id = 0
-        if has_data:
-            hist_all = [h_data] + hist_list_cp
-        else:
-            hist_all = hist_list_cp
+        hist_all = [h_data, *hist_list_cp] if has_data else hist_list_cp
 
         if self.show_sum_bkg:
             legend = self.get_legend(len(hist_all) + 1)
         else:
             legend = self.get_legend(len(hist_all))
 
-        for hist, tag in zip(hist_all, tag_list, strict=False):
+        for hist_id, (hist, tag) in enumerate(zip(hist_all, tag_list, strict=False)):
             if has_data and hist_id == 0:
                 legend.AddEntry(hist, tag + f" {hist.Integral():.0f}", "LP")
                 # add sum of background...
@@ -281,7 +283,6 @@ class Ploter:
                     legend.AddEntry(hist_sum, f"Total Bkg {hist_sum.Integral():.0f}", "F")
             else:
                 legend.AddEntry(hist, tag + f" {hist.Integral():.1f}", "F")
-            hist_id += 1
 
         legend.Draw("same")
         self.add_atlas()
@@ -289,7 +290,6 @@ class Ploter:
 
         if out_name is not None:
             self.can.SaveAs(out_name)
-
 
     def get_legend(self, nentries):
         x_min = self.x_offset
@@ -308,34 +308,33 @@ class Ploter:
 
         return legend
 
-
     def add_atlas(self):
-        adder.add_text(self.x_off_atlas, self.y_offset,
-                       1, "#bf{#it{ATLAS}} " + self.status,
-                       self.text_size)
+        adder.add_text(
+            self.x_off_atlas, self.y_offset, 1, "#bf{#it{ATLAS}} " + self.status, self.text_size
+        )
 
     def add_lumi(self, lumi=-1):
         if lumi < 0:
             lumi = self.lumi
-        adder.add_text(self.x_off_atlas,
-                       self.y_offset - self.text_size - 0.007 ,
-                       1, r"#sqrt{s} = 13 TeV, " + str(lumi) + " fb^{-1}",
-                       self.text_size)
+        adder.add_text(
+            self.x_off_atlas,
+            self.y_offset - self.text_size - 0.007,
+            1,
+            r"#sqrt{s} = 13 TeV, " + str(lumi) + " fb^{-1}",
+            self.text_size,
+        )
 
     def get_offset(self, hist):
         max_bin = hist.GetMaximumBin()
 
         last_bin = hist.GetXaxis().GetLast()
         first_bin = hist.GetXaxis().GetFirst()
-        if max_bin < first_bin + (last_bin - first_bin) / 2.:
+        if max_bin < first_bin + (last_bin - first_bin) / 2.0:
             self.x_offset = 0.53
             self.x_off_atlas = 0.25
 
-
     def stack(self, hist_list):
-        hist_list_cp = []  # a list of non-data histograms
-        for hist in hist_list:
-            hist_list_cp.append(hist.Clone(hist.GetName() + "stackClone"))
+        hist_list_cp = [hist.Clone(hist.GetName() + "stackClone") for hist in hist_list]
 
         self.totalObj.append(hist_list_cp)
 
@@ -363,7 +362,6 @@ class Ploter:
             hist.SetLineStyle(self.LINE_STYLE[i])
 
     def get_y_range(self, hist_list, is_logY):
-        hist = hist_list[0]
         y_max = max(hist_list, key=lambda x: x.GetMaximum()).GetMaximum()
         y_min = min(hist_list, key=lambda x: x.GetMinimum()).GetMinimum()
 
@@ -373,20 +371,20 @@ class Ploter:
             else:
                 self.can.SetLogy()
 
-            return (4E-3, y_max * 1e2)
+            return (4e-3, y_max * 1e2)
             # hist.GetYaxis().SetRangeUser(4E-3, y_max*1e2)
         if y_min < 0:
             y_min *= 1.1
         else:
             y_min *= 0.9
-        if abs(y_min) < 1E-6:
-            y_min = 1E-3
+        if abs(y_min) < 1e-6:
+            y_min = 1e-3
         return (y_min, y_max * 1.3)
-            # hist.GetYaxis().SetRangeUser(y_min, y_max*1.3)
-
+        # hist.GetYaxis().SetRangeUser(y_min, y_max*1.3)
 
     def compare_hists(self, hist_list, tag_list, **kwargs):
-        """A list of histograms,
+        """A list of histograms.
+
         Key words include:
             ratio_title, ratio_range, logY, out_name
             no_fill, x_offset, draw_option,
@@ -401,7 +399,7 @@ class Ploter:
             return
         has_empty_hist = False
         for hist in hist_list:
-            if hist.Integral() < 1E-7:
+            if hist.Integral() < 1e-7:
                 has_empty_hist = True
                 break
         if has_empty_hist:
@@ -418,7 +416,7 @@ class Ploter:
             for h in hist_list:
                 if h.GetSumw2 is None:
                     h.Sumw2()
-                h.Scale(1. / h.Integral())
+                h.Scale(1.0 / h.Integral())
 
         try:
             no_fill = kwargs["no_fill"]
@@ -429,7 +427,6 @@ class Ploter:
             add_ratio = self.add_ratio = kwargs["add_ratio"]
         except KeyError:
             add_ratio = self.add_ratio
-
 
         self.color(hist_list, no_fill)
 
@@ -477,7 +474,6 @@ class Ploter:
             add_yield = False
 
         for i, hist in enumerate(hist_list):
-
             if add_yield:
                 legend.AddEntry(hist, f"{tag_list[i]}: {hist.Integral():.3f}")
             else:
@@ -493,9 +489,13 @@ class Ploter:
         self.add_atlas()
         self.add_lumi()
         if "label" in kwargs:
-            adder.add_text(self.x_off_atlas,
-                           self.y_offset - self.text_size * 2 - 0.007 * 2,
-                           1, kwargs["label"], self.text_size)
+            adder.add_text(
+                self.x_off_atlas,
+                self.y_offset - self.text_size * 2 - 0.007 * 2,
+                1,
+                kwargs["label"],
+                self.text_size,
+            )
 
         try:
             out_name = kwargs["out_name"]
@@ -507,7 +507,7 @@ class Ploter:
         except KeyError:
             out_folder = "./"
 
-        self.mkdir_p(out_folder)
+        Path(out_folder).mkdir(parents=True, exist_ok=True)
 
         if is_logy:
             self.can.SaveAs(out_folder + "/" + out_name + "_Log.eps")
@@ -515,7 +515,6 @@ class Ploter:
         else:
             self.can.SaveAs(out_folder + "/" + out_name + ".eps")
             self.can.SaveAs(out_folder + "/" + out_name + ".pdf")
-
 
     def set_y_offset(self):
         if not self.add_ratio:
@@ -535,9 +534,9 @@ class Ploter:
             del self.pad2
 
     def set_palette(self):
-        red_list = [1., 1., 0.]
-        white_list = [0., 1.0, 0.0]
-        blue_list = [0., 1., 1.]
+        red_list = [1.0, 1.0, 0.0]
+        white_list = [0.0, 1.0, 0.0]
+        blue_list = [0.0, 1.0, 1.0]
         length_list = [0.0, 0.5, 1.0]
         nb = 50
         ROOT.TColor.CreateGradientColorTable(
@@ -546,7 +545,8 @@ class Ploter:
             array("d", red_list),
             array("d", white_list),
             array("d", blue_list),
-            nb)
+            nb,
+        )
 
     def plot_correlation(self, corr_hist, out_name, thre=0.05):
         # plot the 2D,
@@ -569,8 +569,8 @@ class Ploter:
         h_new.GetYaxis().SetLabelSize(0.02)
         h_new.GetZaxis().SetLabelSize(0.02)
         h_new.GetZaxis().SetRangeUser(-1, 1)
-        h_new.GetXaxis().SetTickSize(0.)
-        h_new.GetYaxis().SetTickSize(0.)
+        h_new.GetXaxis().SetTickSize(0.0)
+        h_new.GetYaxis().SetTickSize(0.0)
 
         self.can.SaveAs(out_name + ".eps")
         self.can.SaveAs(out_name + ".pdf")
@@ -581,7 +581,7 @@ class Ploter:
             is_empty = True
             for ybin in range(h2d.GetNbinsY()):
                 value = h2d.GetBinContent(xbin + 1, ybin + 1)
-                if abs(value) > thre and abs(value - 1) > 1E-3:
+                if abs(value) > thre and abs(value - 1) > 1e-3:
                     is_empty = False
                     break
             if is_empty:
@@ -592,9 +592,16 @@ class Ploter:
         print(f"originally {org_bins} bins")
         print(f"finally {final_bins} bins")
         if True:
-            h2d_new = ROOT.TH2D("reduced_correlation", "reduced_correlation",
-                                final_bins, 0.5, final_bins + 0.5,
-                                final_bins, 0.5, final_bins + 0.5)
+            h2d_new = ROOT.TH2D(
+                "reduced_correlation",
+                "reduced_correlation",
+                final_bins,
+                0.5,
+                final_bins + 0.5,
+                final_bins,
+                0.5,
+                final_bins + 0.5,
+            )
             new_x = 0
             for xbin in range(h2d.GetNbinsX()):
                 if (xbin + 1) in empty_xbins:
@@ -645,35 +652,24 @@ class Ploter:
             nbins,
             array("d", x_list),
             array("d", y_nom_list),
-            array("d", [0.] * nbins),  # error of x (low)
-            array("d", [0.] * nbins),  # error of x (high)
+            array("d", [0.0] * nbins),  # error of x (low)
+            array("d", [0.0] * nbins),  # error of x (high)
             array("d", y_down_list),  # error of y (low)
-            array("d", y_up_list)  # error of y (high)
+            array("d", y_up_list),  # error of y (high)
         )
         nbins += 1
         gr_one = ROOT.TGraphErrors(
             nbins,
             array("d", [x - 0.5 for x in x_list] + [nbins]),
-            array("d", [0.] * nbins),
-            array("d", [0.] * nbins),  # error of x
-            array("d", [1.] * nbins)  # error of y
+            array("d", [0.0] * nbins),
+            array("d", [0.0] * nbins),  # error of x
+            array("d", [1.0] * nbins),  # error of y
         )
         gr_two = ROOT.TGraphErrors(
             nbins,
             array("d", [x - 0.5 for x in x_list] + [nbins]),
-            array("d", [0.] * nbins),
-            array("d", [0.] * nbins),  # error of x
-            array("d", [2.] * nbins)  # error of y
+            array("d", [0.0] * nbins),
+            array("d", [0.0] * nbins),  # error of x
+            array("d", [2.0] * nbins),  # error of y
         )
         return gr, gr_one, gr_two
-
-    @staticmethod
-    def mkdir_p(path):
-        try:
-            os.makedirs(path)
-            print(path, "is created")
-        except OSError as exc:
-            if exc.errno == errno.EEXIST and os.path.isdir(path):
-                pass
-            else:
-                raise

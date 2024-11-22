@@ -15,6 +15,7 @@ log = pylogger.get_pylogger(__name__)
 def task_wrapper(task_func: Callable) -> Callable:
     """Optional decorator that wraps the task function in extra utilities.
     Makes multirun more resistant to failure.
+
     Utilities:
     - Calling the `utils.extras()` before the task is started
     - Calling the `utils.close_loggers()` after the task is finished
@@ -24,7 +25,6 @@ def task_wrapper(task_func: Callable) -> Callable:
     """
 
     def wrap(cfg: DictConfig):
-
         # apply extra utilities
         extras(cfg)
 
@@ -48,6 +48,7 @@ def task_wrapper(task_func: Callable) -> Callable:
 
 def extras(cfg: DictConfig) -> None:
     """Applies optional utilities before the task is started.
+
     Utilities:
     - Ignoring python warnings
     - Setting tags from command line
@@ -98,8 +99,12 @@ def instantiate_tasks(task_cfg: DictConfig) -> list[Any]:
     if "_target_" in task_cfg:
         tasks.append(hydra.utils.instantiate(task_cfg))
     else:
-        for _, t_conf in task_cfg.items():
-            if isinstance(t_conf, DictConfig) and "_target_" in t_conf:
-                tasks.append(hydra.utils.instantiate(t_conf))
+        tasks.append(
+            [
+                hydra.utils.instantiate(t_conf)
+                for t_conf in task_cfg.values()
+                if isinstance(t_conf, DictConfig) and "_target_" in t_conf
+            ]
+        )
 
     return tasks
