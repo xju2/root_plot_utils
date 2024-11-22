@@ -7,8 +7,11 @@ root = pyrootutils.setup_root(
     dotenv=True,
 )
 
-import ROOT
 from pathlib import Path
+
+import ROOT
+
+
 def main():
     fname = root / "data/MyPhysVal_CKF.root"
     # list all histograms in the ROOT file

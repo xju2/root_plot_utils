@@ -1,5 +1,6 @@
 import ROOT
 
+
 def create_ratio(hist_ref: ROOT.TH1, hist_comparator: ROOT.TH1):
     ratio = hist_comparator.Clone()
     ratio.Divide(hist_comparator, hist_ref, 1.0, 1.0, "B")

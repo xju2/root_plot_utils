@@ -16,13 +16,15 @@ import inspect
 import pickle
 import types
 from argparse import Namespace
+from collections.abc import MutableMapping, Sequence
 from dataclasses import fields, is_dataclass
-from typing import Any, Dict, List, Literal, MutableMapping, Optional, Sequence, Tuple, Type, Union
+from typing import Any, Literal
+
 from vroot import utils
 
 log = utils.get_pylogger(__name__)
 
-class AttributeDict(Dict):
+class AttributeDict(dict):
     """Extended dictionary accessible with dot notation.
     >>> ad = AttributeDict({'key1': 1, 'key2': 'abc'})
     >>> ad.key1
@@ -37,7 +39,7 @@ class AttributeDict(Dict):
     "new_key": 42
     """
 
-    def __getattr__(self, key: str) -> Optional[Any]:
+    def __getattr__(self, key: str) -> Any | None:
         try:
             return self[key]
         except KeyError as exp:
@@ -60,7 +62,6 @@ PRIMITIVE_TYPES = (bool, int, float, str)
 
 def is_picklable(obj: object) -> bool:
     """Tests if an object can be pickled."""
-
     try:
         pickle.dumps(obj)
         return True
@@ -77,14 +78,16 @@ def clean_namespace(hparams: MutableMapping) -> None:
         del hparams[k]
 
 
-def parse_class_init_keys(cls: Any) -> Tuple[str, Optional[str], Optional[str]]:
+def parse_class_init_keys(cls: Any) -> tuple[str, str | None, str | None]:
     """Parse key words for standard ``self``, ``*args`` and ``**kwargs``.
+
     Examples:
         >>> class Model():
         ...     def __init__(self, hparams, *my_args, anykw=42, **my_kwargs):
         ...         pass
         >>> parse_class_init_keys(Model)
         ('self', 'my_args', 'my_kwargs')
+
     """
     init_parameters = inspect.signature(cls.__init__).parameters
     # docs claims the params are always ordered
@@ -94,9 +97,9 @@ def parse_class_init_keys(cls: Any) -> Tuple[str, Optional[str], Optional[str]]:
     n_self = init_params[0].name
 
     def _get_first_if_any(
-        params: List[inspect.Parameter],
+        params: list[inspect.Parameter],
         param_type: Literal[inspect._ParameterKind.VAR_POSITIONAL, inspect._ParameterKind.VAR_KEYWORD],
-    ) -> Optional[str]:
+    ) -> str | None:
         for p in params:
             if p.kind == param_type:
                 return p.name
@@ -108,7 +111,7 @@ def parse_class_init_keys(cls: Any) -> Tuple[str, Optional[str], Optional[str]]:
     return n_self, n_args, n_kwargs
 
 
-def get_init_args(frame: types.FrameType) -> Tuple[Optional[Any], Dict[str, Any]]:
+def get_init_args(frame: types.FrameType) -> tuple[Any | None, dict[str, Any]]:
     _, _, _, local_vars = inspect.getargvalues(frame)
     if "__class__" not in local_vars:
         return None, {}
@@ -129,11 +132,12 @@ def get_init_args(frame: types.FrameType) -> Tuple[Optional[Any], Dict[str, Any]
 
 def collect_init_args(
     frame: types.FrameType,
-    path_args: List[Dict[str, Any]],
+    path_args: list[dict[str, Any]],
     inside: bool = False,
-    classes: Tuple[Type, ...] = (),
-) -> List[Dict[str, Any]]:
+    classes: tuple[type, ...] = (),
+) -> list[dict[str, Any]]:
     """Recursively collects the arguments passed to the child constructors in the inheritance tree.
+
     Args:
         frame: the current stack frame
         path_args: a list of dictionaries containing the constructor args in all parent classes
@@ -143,6 +147,7 @@ def collect_init_args(
           A list of dictionaries where each dictionary contains the arguments passed to the
           constructor at that level. The last entry corresponds to the constructor call of the
           most specific class in the hierarchy.
+
     """
     _, _, _, local_vars = inspect.getargvalues(frame)
     # frame.f_back must be of a type types.FrameType for get_init_args/collect_init_args due to mypy
@@ -160,10 +165,9 @@ def collect_init_args(
 
 
 def save_hyperparameters(
-    obj: Any, *args: Any, ignore: Optional[Union[Sequence[str], str]] = None, frame: Optional[types.FrameType] = None
+    obj: Any, *args: Any, ignore: Sequence[str] | str | None = None, frame: types.FrameType | None = None
 ) -> None:
     """See :meth:`~lightning.pytorch.LightningModule.save_hyperparameters`"""
-
     if len(args) == 1 and not isinstance(args, str) and not args[0]:
         # args[0] is an empty container
         return
@@ -225,7 +229,7 @@ def save_hyperparameters(
 
 class HyperparametersMixin:
 
-    __jit_unused_properties__: List[str] = ["hparams", "hparams_initial"]
+    __jit_unused_properties__: list[str] = ["hparams", "hparams_initial"]
 
     def __init__(self) -> None:
         super().__init__()
@@ -234,11 +238,12 @@ class HyperparametersMixin:
     def save_hyperparameters(
         self,
         *args: Any,
-        ignore: Optional[Union[Sequence[str], str]] = None,
-        frame: Optional[types.FrameType] = None,
+        ignore: Sequence[str] | str | None = None,
+        frame: types.FrameType | None = None,
         logger: bool = True,
     ) -> None:
         """Save arguments to ``hparams`` attribute.
+
         Args:
             args: single object of `dict`, `NameSpace` or `OmegaConf`
                 or string names or arguments from class ``__init__``
@@ -297,6 +302,7 @@ class HyperparametersMixin:
             >>> model.hparams
             "arg1": 1
             "arg3": 3.14
+
         """
         self._log_hyperparams = logger
         # the frame needs to be created in this file.
@@ -306,7 +312,7 @@ class HyperparametersMixin:
                 frame = current_frame.f_back
         save_hyperparameters(self, *args, ignore=ignore, frame=frame)
 
-    def _set_hparams(self, hp: Union[MutableMapping, Namespace, str]) -> None:
+    def _set_hparams(self, hp: MutableMapping | Namespace | str) -> None:
         hp = self._to_hparams_dict(hp)
 
         if isinstance(hp, dict) and isinstance(self.hparams, dict):
@@ -315,7 +321,7 @@ class HyperparametersMixin:
             self._hparams = hp
 
     @staticmethod
-    def _to_hparams_dict(hp: Union[MutableMapping, Namespace, str]) -> Union[MutableMapping, AttributeDict]:
+    def _to_hparams_dict(hp: MutableMapping | Namespace | str) -> MutableMapping | AttributeDict:
         if isinstance(hp, Namespace):
             hp = vars(hp)
         if isinstance(hp, dict):
@@ -327,11 +333,13 @@ class HyperparametersMixin:
         return hp
 
     @property
-    def hparams(self) -> Union[AttributeDict, MutableMapping]:
+    def hparams(self) -> AttributeDict | MutableMapping:
         """The collection of hyperparameters saved with :meth:`save_hyperparameters`. It is mutable by the user.
         For the frozen set of initial hyperparameters, use :attr:`hparams_initial`.
+
         Returns:
             Mutable hyperparameters dictionary
+
         """
         if not hasattr(self, "_hparams"):
             self._hparams = AttributeDict()
@@ -341,8 +349,10 @@ class HyperparametersMixin:
     def hparams_initial(self) -> AttributeDict:
         """The collection of hyperparameters saved with :meth:`save_hyperparameters`. These contents are read-only.
         Manual updates to the saved hyperparameters can instead be performed through :attr:`hparams`.
+
         Returns:
             AttributeDict: immutable initial hyperparameters
+
         """
         if not hasattr(self, "_hparams_initial"):
             return AttributeDict()

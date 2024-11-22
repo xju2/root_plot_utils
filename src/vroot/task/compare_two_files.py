@@ -1,10 +1,10 @@
 from pathlib import Path
 
 from vroot.task.base import TaskBase
-from vroot.utils import get_pylogger
-from vroot.tools.reader import TH1FileHandle
-from vroot.tools.ratio import create_ratio
 from vroot.tools import adder
+from vroot.tools.ratio import create_ratio
+from vroot.tools.reader import TH1FileHandle
+from vroot.utils import get_pylogger
 
 logger = get_pylogger(__name__)
 

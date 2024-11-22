@@ -1,9 +1,9 @@
-"""Plot histograms from one file"""
+"""Plot histograms from one file."""
 from pathlib import Path
-from vroot.task.base import TaskBase
-from vroot.utils import get_pylogger
-from vroot.tools.reader import TH1FileHandle
 
+from vroot.task.base import TaskBase
+from vroot.tools.reader import TH1FileHandle
+from vroot.utils import get_pylogger
 
 logger = get_pylogger(__name__)
 

@@ -13,7 +13,7 @@ resolvers.add_my_resolvers()
 def main_function(cfg: DictConfig) -> None:
     """Main function to invoke different tasks."""
     logging.basicConfig(
-        filename=Path(cfg.paths.output_dir, "log.txt"), encoding='uft-8', level=logging.INFO)
+        filename=Path(cfg.paths.output_dir, "log.txt"), encoding="uft-8", level=logging.INFO)
     if not cfg.get("task"):
         raise ValueError("Task is not specified in the config file.")
 

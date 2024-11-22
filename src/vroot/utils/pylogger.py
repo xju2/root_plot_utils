@@ -1,8 +1,8 @@
 import logging
 
+
 def get_pylogger(name=__name__) -> logging.Logger:
     """Initializes python command line logger."""
-
     logger = logging.getLogger(name)
 
     # # this ensures all logging levels get marked with the rank zero decorator

@@ -1,7 +1,8 @@
 import time
 import warnings
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable, List, Any
+from typing import Any
 
 import hydra
 from omegaconf import DictConfig
@@ -52,7 +53,6 @@ def extras(cfg: DictConfig) -> None:
     - Setting tags from command line
     - Rich config printing
     """
-
     # return if no `extras` config
     if not cfg.get("extras"):
         log.warning("Extras config not found! <cfg.extras=null>")
@@ -82,13 +82,11 @@ def save_file(path: str, content: str) -> None:
 
 def close_loggers() -> None:
     """Makes sure all loggers closed properly (prevents logging failure during multirun)."""
-
     log.info("Closing loggers...")
 
 
-def instantiate_tasks(task_cfg: DictConfig) -> List[Any]:
+def instantiate_tasks(task_cfg: DictConfig) -> list[Any]:
     """Instantiates all tasks from config file."""
-
     tasks = []
     if not task_cfg:
         log.warning("Task config is empty!")

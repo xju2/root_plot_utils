@@ -1,18 +1,18 @@
-from typing import Dict
-import ROOT
 import random
-import vroot.tools.AtlasStyle   # noqa
 
-
+import ROOT
 from omegaconf import DictConfig
+
+import vroot.tools.AtlasStyle  # noqa: F401
+
 
 class Canvas:
     def __init__(self,
                  otypes: str | list[str],
-                 size: Dict,
-                 atlas_label: Dict,
-                 other_label: Dict,
-                 legend: Dict) -> None:
+                 size: dict,
+                 atlas_label: dict,
+                 other_label: dict,
+                 legend: dict) -> None:
         if isinstance(otypes, list):
             self.otypes = otypes
         elif "," in otypes:
@@ -38,8 +38,7 @@ class Canvas:
             pad2.SetBottomMargin(0.5)
             pad2.Draw()
             return canvas, pad1, pad2
-        else:
-            return canvas, None, None
+        return canvas, None, None
 
     def create_legend(self):
         x = self.legend.x

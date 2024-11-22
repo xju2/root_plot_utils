@@ -1,7 +1,8 @@
-#!/usr/bin/env python
-import ROOT
-from array import array
 import math
+from array import array
+
+import ROOT
+
 
 def add_text(x, y, color, text, size=0.05, font=42):
     l = ROOT.TLatex()
@@ -37,10 +38,10 @@ def make_legend(x1, y1, x2, y2):
 
 
 def add_band(hist, center, width, add_stats=True):
-    x = array('d')
-    y = array('d')
-    up = array('d')
-    down = array('d')
+    x = array("d")
+    y = array("d")
+    up = array("d")
+    down = array("d")
     weight = hist.Integral() / hist.GetEntries()
     for i in range(hist.GetXaxis().GetNbins()):
         ibin = i + 1

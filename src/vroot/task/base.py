@@ -1,12 +1,14 @@
-from vroot.hparams_mixin import HyperparametersMixin
 from omegaconf import DictConfig
 
+from vroot.hparams_mixin import HyperparametersMixin
 from vroot.tools.canvas import Canvas
 from vroot.tools.histograms import Histograms
+
+
 class TaskHooks:
 
     def run(self) -> None:
-        """Run the task"""
+        """Run the task."""
 
 
 class TaskBase(TaskHooks, HyperparametersMixin):
@@ -16,9 +18,9 @@ class TaskBase(TaskHooks, HyperparametersMixin):
         self.histograms: Histograms = None
 
     def set_canvas(self, canvas: Canvas) -> None:
-        """Add canvas to the task"""
+        """Add canvas to the task."""
         self.canvas = canvas
 
     def add_histograms(self, histo_config: DictConfig) -> None:
-        """Add histograms to the task"""
+        """Add histograms to the task."""
         self.histograms = Histograms(histo_config)

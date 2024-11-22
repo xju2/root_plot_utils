@@ -1,16 +1,17 @@
-from __future__ import absolute_import
-from __future__ import print_function
 __author__ = "Xiangyang Ju"
 __version__ = "0.1"
 
-import ROOT
-from array import array
-from vroot.tools import AtlasStyle  # noqa: F401
-
-import os
 import errno
+import os
+from array import array
 
-from vroot.tools import adder
+import ROOT
+
+from vroot.tools import (
+    AtlasStyle,  # noqa: F401
+    adder,
+)
+
 
 class Ploter:
     def __init__(self, status="Internal", lumi=36.1):
@@ -72,8 +73,7 @@ class Ploter:
 
     def add_ratio_panel(self, hist_list, y_title,
                         y_min, y_max, reverse=False):
-        """
-        hist_list = [Data, MC1, MC2]
+        """hist_list = [Data, MC1, MC2]
         plot Data/MC1, Data/MC2
         @para=reverse, plot MC1/Data
         """
@@ -84,7 +84,7 @@ class Ploter:
 
         if len(hist_list) < 2:
             print("less than 2 histograms, kidding?")
-            return None
+            return
 
         hist_list_cp = [x.Clone(x.GetName() + "_cloneRatio") for x in hist_list]
         self.totalObj.append(hist_list_cp)
@@ -113,8 +113,8 @@ class Ploter:
             imin_bin = this_hist.GetMinimumBin()
             this_min = this_hist.GetBinContent(imin_bin) - this_hist.GetBinError(imin_bin)
 
-            y_max_auto = this_ymax if this_ymax > y_max_auto else y_max_auto
-            y_min_auto = this_min if this_min < y_min_auto else y_min_auto
+            y_max_auto = max(y_max_auto, this_ymax)
+            y_min_auto = min(y_min_auto, this_min)
             del this_hist
         if y_max is None:
             y_max = y_max_auto * 1.01
@@ -174,7 +174,7 @@ class Ploter:
 
         # In hist_list, the data should be first element, if has_data
         if len(hist_list) > len(self.COLORS):
-            print("{} histograms but only {} predefined colors".format(len(hist_list), len(self.COLORS)))
+            print(f"{len(hist_list)} histograms but only {len(self.COLORS)} predefined colors")
             return
 
         # clone current histograms, so that inputs are untouched.
@@ -200,7 +200,7 @@ class Ploter:
                 h_data = new_hist
                 self.get_offset(h_data)
                 continue
-            elif i == 0 or hist_sum is None:
+            if i == 0 or hist_sum is None:
                 hist_sum = hist
             else:
                 hist_sum.Add(hist)
@@ -230,10 +230,8 @@ class Ploter:
         y_max = hs.GetMaximum()
         y_min = hs.GetMinimum()
         if has_data and h_data is not None:
-            if y_max < h_data.GetMaximum():
-                y_max = h_data.GetMaximum()
-            if y_min > h_data.GetMinimum():
-                y_min = h_data.GetMinimum()
+            y_max = max(y_max, h_data.GetMaximum())
+            y_min = min(y_min, h_data.GetMinimum())
 
         if has_data:
             this_hist = h_data
@@ -273,16 +271,16 @@ class Ploter:
         else:
             legend = self.get_legend(len(hist_all))
 
-        for hist, tag in zip(hist_all, tag_list):
+        for hist, tag in zip(hist_all, tag_list, strict=False):
             if has_data and hist_id == 0:
-                legend.AddEntry(hist, tag + " {:.0f}".format(hist.Integral()), "LP")
+                legend.AddEntry(hist, tag + f" {hist.Integral():.0f}", "LP")
                 # add sum of background...
                 if self.show_sum_bkg:
                     hist_sum.SetFillColor(0)
                     hist_sum.SetLineColor(0)
-                    legend.AddEntry(hist_sum, "Total Bkg {:.0f}".format(hist_sum.Integral()), "F")
+                    legend.AddEntry(hist_sum, f"Total Bkg {hist_sum.Integral():.0f}", "F")
             else:
-                legend.AddEntry(hist, tag + " {:.1f}".format(hist.Integral()), "F")
+                legend.AddEntry(hist, tag + f" {hist.Integral():.1f}", "F")
             hist_id += 1
 
         legend.Draw("same")
@@ -377,20 +375,18 @@ class Ploter:
 
             return (4E-3, y_max * 1e2)
             # hist.GetYaxis().SetRangeUser(4E-3, y_max*1e2)
+        if y_min < 0:
+            y_min *= 1.1
         else:
-            if y_min < 0:
-                y_min *= 1.1
-            else:
-                y_min *= 0.9
-            if abs(y_min) < 1E-6:
-                y_min = 1E-3
-            return (y_min, y_max * 1.3)
+            y_min *= 0.9
+        if abs(y_min) < 1E-6:
+            y_min = 1E-3
+        return (y_min, y_max * 1.3)
             # hist.GetYaxis().SetRangeUser(y_min, y_max*1.3)
 
 
     def compare_hists(self, hist_list, tag_list, **kwargs):
-        """
-        a list of histograms,
+        """A list of histograms,
         Key words include:
             ratio_title, ratio_range, logY, out_name
             no_fill, x_offset, draw_option,
@@ -413,7 +409,7 @@ class Ploter:
 
         # shape comparison
         try:
-            density = kwargs['density']
+            density = kwargs["density"]
         except KeyError:
             density = False
 
@@ -438,7 +434,7 @@ class Ploter:
         self.color(hist_list, no_fill)
 
         if add_ratio:
-            self.prepare_2pad_canvas('canvas', 600, 600)
+            self.prepare_2pad_canvas("canvas", 600, 600)
             self.pad2.cd()
 
             ratio_title = kwargs.get("ratio_title", "MC / Data")
@@ -467,7 +463,7 @@ class Ploter:
 
         y_min, y_max = self.get_y_range(hist_list, is_logy)
         if "y_min" in kwargs:
-            y_min = kwargs['y_min']
+            y_min = kwargs["y_min"]
 
         hist_list[0].GetYaxis().SetRangeUser(y_min, y_max)
         try:
@@ -476,14 +472,14 @@ class Ploter:
             draw_option = "HIST"
 
         try:
-            add_yield = kwargs['add_yields']
+            add_yield = kwargs["add_yields"]
         except KeyError:
             add_yield = False
 
         for i, hist in enumerate(hist_list):
 
             if add_yield:
-                legend.AddEntry(hist, "{}: {:.3f}".format(tag_list[i], hist.Integral()))
+                legend.AddEntry(hist, f"{tag_list[i]}: {hist.Integral():.3f}")
             else:
                 legend.AddEntry(hist, tag_list[i])
 
@@ -496,10 +492,10 @@ class Ploter:
         legend.Draw("same")
         self.add_atlas()
         self.add_lumi()
-        if 'label' in kwargs.keys():
+        if "label" in kwargs:
             adder.add_text(self.x_off_atlas,
                            self.y_offset - self.text_size * 2 - 0.007 * 2,
-                           1, kwargs['label'], self.text_size)
+                           1, kwargs["label"], self.text_size)
 
         try:
             out_name = kwargs["out_name"]
@@ -546,10 +542,10 @@ class Ploter:
         nb = 50
         ROOT.TColor.CreateGradientColorTable(
             3,
-            array('d', length_list),
-            array('d', red_list),
-            array('d', white_list),
-            array('d', blue_list),
+            array("d", length_list),
+            array("d", red_list),
+            array("d", white_list),
+            array("d", blue_list),
             nb)
 
     def plot_correlation(self, corr_hist, out_name, thre=0.05):
@@ -569,7 +565,7 @@ class Ploter:
         h_new.SetMarkerSize(0.7)
         ROOT.gStyle.SetPaintTextFormat("3.2f")
         h_new.GetXaxis().SetLabelSize(0.02)
-        h_new.GetXaxis().LabelsOption('u')
+        h_new.GetXaxis().LabelsOption("u")
         h_new.GetYaxis().SetLabelSize(0.02)
         h_new.GetZaxis().SetLabelSize(0.02)
         h_new.GetZaxis().SetRangeUser(-1, 1)
@@ -593,8 +589,8 @@ class Ploter:
 
         final_bins = h2d.GetNbinsX() - len(empty_xbins)
         org_bins = h2d.GetNbinsX()
-        print("originally {} bins".format(org_bins))
-        print("finally {} bins".format(final_bins))
+        print(f"originally {org_bins} bins")
+        print(f"finally {final_bins} bins")
         if True:
             h2d_new = ROOT.TH2D("reduced_correlation", "reduced_correlation",
                                 final_bins, 0.5, final_bins + 0.5,
@@ -647,27 +643,27 @@ class Ploter:
         nbins = len(x_list)
         gr = ROOT.TGraphAsymmErrors(
             nbins,
-            array('d', x_list),
-            array('d', y_nom_list),
-            array('d', [0.] * nbins),  # error of x (low)
-            array('d', [0.] * nbins),  # error of x (high)
-            array('d', y_down_list),  # error of y (low)
-            array('d', y_up_list)  # error of y (high)
+            array("d", x_list),
+            array("d", y_nom_list),
+            array("d", [0.] * nbins),  # error of x (low)
+            array("d", [0.] * nbins),  # error of x (high)
+            array("d", y_down_list),  # error of y (low)
+            array("d", y_up_list)  # error of y (high)
         )
         nbins += 1
         gr_one = ROOT.TGraphErrors(
             nbins,
-            array('d', [x - 0.5 for x in x_list] + [nbins]),
-            array('d', [0.] * nbins),
-            array('d', [0.] * nbins),  # error of x
-            array('d', [1.] * nbins)  # error of y
+            array("d", [x - 0.5 for x in x_list] + [nbins]),
+            array("d", [0.] * nbins),
+            array("d", [0.] * nbins),  # error of x
+            array("d", [1.] * nbins)  # error of y
         )
         gr_two = ROOT.TGraphErrors(
             nbins,
-            array('d', [x - 0.5 for x in x_list] + [nbins]),
-            array('d', [0.] * nbins),
-            array('d', [0.] * nbins),  # error of x
-            array('d', [2.] * nbins)  # error of y
+            array("d", [x - 0.5 for x in x_list] + [nbins]),
+            array("d", [0.] * nbins),
+            array("d", [0.] * nbins),  # error of x
+            array("d", [2.] * nbins)  # error of y
         )
         return gr, gr_one, gr_two
 

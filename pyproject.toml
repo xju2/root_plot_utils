@@ -53,6 +53,9 @@ lint.ignore = [
 ]
 extend-exclude = ["*.ipynb"]
 
+[tool.pydocstyle]
+convention = "numpy"
+
 [tool.hatch.version]
 path = "src/vroot/__about__.py"
 

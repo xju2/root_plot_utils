@@ -1,14 +1,12 @@
 import warnings
-from typing import List
 from pathlib import Path
 
 import numpy as np
-
-from vroot.tools.histograms import HistogramOptions
-from vroot.hparams_mixin import HyperparametersMixin
-from vroot.utils import get_pylogger
-
 import ROOT
+
+from vroot.hparams_mixin import HyperparametersMixin
+from vroot.tools.histograms import HistogramOptions
+from vroot.utils import get_pylogger
 
 logger = get_pylogger(__name__)
 
@@ -46,8 +44,7 @@ class TH1FileHandle(HyperparametersMixin):
         self.file_handle = ROOT.TFile.Open(self.hparams.path)
         if self.file_handle is None:
             raise RuntimeError(f"Cannot open file {self.hparams.path}")
-        else:
-            logger.info(f"Open {self.hparams.name} from {self.hparams.path}")
+        logger.info(f"Open {self.hparams.name} from {self.hparams.path}")
 
     def __str__(self) -> str:
         return f"TH1FileHandle: name={self.hparams.name}, path={self.hparams.path}"
@@ -57,7 +54,6 @@ class TH1FileHandle(HyperparametersMixin):
 
     def read(self, histogram: HistogramOptions) -> ROOT.TH1:
         """Read histogram from file and apply options"""
-
         hist_options = histogram.hparams
         th1 = self.read_by_name(hist_options.histname)
         th1_type = type(th1)
@@ -105,8 +101,7 @@ class TH1FileHandle(HyperparametersMixin):
         hist.SetLineWidth(2)
         if th1_type is ROOT.TEfficiency:
             return hist, hist_copy
-        else:
-            return hist, hist
+        return hist, hist
 
     def read_by_name(self, histname: str) -> ROOT.TH1:
         th1 = self.file_handle.Get(histname)
@@ -118,7 +113,7 @@ class TH1FileHandle(HyperparametersMixin):
 
         return th1
 
-    def get_all_histogram_names(self) -> List[str]:
+    def get_all_histogram_names(self) -> list[str]:
         """Get all histogram names in this file"""
         all_objects = {}
 
