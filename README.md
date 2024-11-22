@@ -12,7 +12,7 @@ To setup the environment, in Faraday, `conda-start tf2.7`.
 
 ### Plot histograms from a root file
 ```bash
-python scripts/run_vroot.py task_name=gnn_tracking task=plot_histograms histograms=idpvm_efficiencies
+python scripts/run_vroot.py task_name=gnn_tracking task=plot_histograms histograms=rel24_idpvm_efficiencies task.filehandle.path=data/physval.v4.root
 ```
 ### Compare histograms from two root files
 ```bash

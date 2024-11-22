@@ -1,0 +1,61 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "vroot"
+dynamic = ["version"]
+description = ''
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+keywords = []
+authors = [
+  { name = "Xiangyang Ju", email = "xju@lbl.gov" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+]
+
+[project.scripts]
+run_vroot = "vroot.run_vroot:main"
+
+[project.urls]
+Documentation = "https://github.com/xju2/root_plot_utils#readme"
+Issues = "https://github.com/xju2/root_plot_utils/issues"
+Source = "https://github.com/xju2/root_plot_utils"
+
+[tool.hatch.version]
+path = "src/vroot/__about__.py"
+
+[tool.hatch.envs.types]
+extra-dependencies = [
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/vroot tests}"
+
+[tool.coverage.run]
+source_pkgs = ["vroot", "tests"]
+branch = true
+parallel = true
+omit = [
+  "src/vroot/__about__.py",
+]
+
+[tool.coverage.paths]
+vroot = ["src/vroot", "*/vroot/src/vroot"]
+tests = ["tests", "*/vroot/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
