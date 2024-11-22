@@ -1,28 +1,17 @@
-import pyrootutils
-
-root = pyrootutils.setup_root(
-    search_from=__file__,
-    indicator=[".git", "pyproject.toml"],
-    pythonpath=True,
-    dotenv=True,
-)
-
 import logging
 from pathlib import Path
 
 import hydra
-from omegaconf import DictConfig, OmegaConf  # noqa
-from vroot.utils import resolvers
-resolvers.add_my_resolvers()
+from omegaconf import DictConfig, OmegaConf
 
-# from vroot.task.base import TaskBase
 from vroot import utils
+from vroot.utils import resolvers
+
+resolvers.add_my_resolvers()
 
 @utils.task_wrapper
 def main_function(cfg: DictConfig) -> None:
-    """Main function to invoke different tasks
-    """
-
+    """Main function to invoke different tasks."""
     logging.basicConfig(
         filename=Path(cfg.paths.output_dir, "log.txt"), encoding='uft-8', level=logging.INFO)
     if not cfg.get("task"):
@@ -38,11 +27,10 @@ def main_function(cfg: DictConfig) -> None:
 
     task.run()
 
-print(f"root: {root}")
 @hydra.main(config_path="configs",
             config_name="run_task.yaml", version_base="1.2.0")
 def main_module(cfg: DictConfig) -> None:
-    # print(OmegaConf.to_yaml(cfg))
+    print(OmegaConf.to_yaml(cfg))
     main_function(cfg)
 
 def main():
