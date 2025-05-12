@@ -38,6 +38,20 @@ run_vroot -m \
   canvas.otypes=png,pdf
 }
 
-gnn4pixel_with_AR
+gnn4itkML() {
+run_vroot -m \
+  task_name=gnn4pixel task=compare_two_files \
+  task.reference_file.path=data/gnn4itk/paper2025data_v2.idpvm.ckf.ttbar.root \
+  task.reference_file.name=main \
+  task.comparator_file.path=data/gnn4itk/paper2025data_v2.idpvm.gnn4itkTriton.tracking.ttbar.root \
+  task.comparator_file.name="GNN w/ Metric Learning" \
+  "histograms=glob(rel24_idpvm*)" \
+  "canvas.other_label.text='#sqrt{s} = 14 TeV, t#bar{t}, <#mu> = 200, HS'" \
+  canvas.otypes=png,pdf
+}
+
+# gnn4pixel_with_AR
 # gnn4pixel_without_AR
 # gnn4ITk_ML_no_AR
+
+gnn4itkML

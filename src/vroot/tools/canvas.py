@@ -7,6 +7,8 @@ import vroot.tools.AtlasStyle
 
 
 class Canvas:
+    canvas_id_counter = 0
+
     def __init__(
         self,
         otypes: str | list[str],
@@ -25,11 +27,12 @@ class Canvas:
         self.atlas_label = atlas_label
         self.other_label = other_label
         self.legend = legend
-        self.cid = 0
+        self.cid = Canvas.canvas_id_counter
+        Canvas.canvas_id_counter += 1
 
     def create(self, with_ratio: bool) -> None:
-        name = f"canvas{self.cid}"
-        self.cid += 1
+        name = f"canvas{Canvas.canvas_id_counter}"
+        Canvas.canvas_id_counter += 1
         canvas = ROOT.TCanvas(name, name, self.size.width, self.size.height)
         if with_ratio:
             pad1 = ROOT.TPad("pad1", "pad1", 0, 0.3, 1, 1)

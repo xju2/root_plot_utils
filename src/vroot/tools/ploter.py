@@ -126,7 +126,7 @@ class Ploter:
 
             y_max_auto = max(y_max_auto, this_ymax)
             y_min_auto = min(y_min_auto, this_min)
-            del this_hist
+            # del this_hist
         if y_max is None:
             y_max = y_max_auto * 1.01
         if y_min is None:
@@ -392,7 +392,7 @@ class Ploter:
             out_folder, label,
             density
         """
-        self.del_obj()
+        # self.del_obj()
 
         if len(hist_list) < 2:
             print("not enough hitograms for comparison")
