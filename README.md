@@ -2,7 +2,14 @@
 Plotting macros based on ROOT
 
 ## Create the environment
-I use [nix.dev](https://nix.dev/) to create a reproduciable development environment.
+I use [nix.dev](https://nix.dev/) to create a reproduciable development environment and use [poetry 2.1](https://python-poetry.org/docs/) to manage python virtual environment.
+
+```bash
+poetry install
+eval $(poetry env activate)
+source `root-config --bindir`/thisroot.sh
+```
+or `poetry run which python`.
 
 ## Run the example
 

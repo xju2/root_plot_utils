@@ -53,19 +53,17 @@ class TH1FileHandle(HyperparametersMixin):
 
     def read(self, histogram: HistogramOptions) -> ROOT.TH1:
         """Read histogram from file and apply options."""
-        hist_options = histogram.hparams
-        th1 = self.read_by_name(hist_options.histname)
-        th1_type = type(hist)
+        th1 = self.read_by_name(histogram.name)
+        th1_type = type(th1)
+        hist = th1
         hist_copy = None
 
         if th1_type is ROOT.TEfficiency:
-            hist = convert_TEfficiency_to_TGraphAsymmErrors(hist)
+            hist = convert_TEfficiency_to_TGraphAsymmErrors(th1)
         elif th1_type is ROOT.TProfile:
             hist = th1.ProjectionX()
-        else:
-            hist = th1
 
-        hist = hist_options(hist)
+        hist = histogram(hist)
         hist.SetLineWidth(2)
         if th1_type is ROOT.TEfficiency:
             hist_copy = th1.GetCopyPassedHisto()

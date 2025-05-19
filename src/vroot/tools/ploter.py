@@ -101,7 +101,7 @@ class Ploter:
         self.totalObj.append(hist_list_cp)
 
         h_refer = hist_list_cp[0].Clone("Histreference")
-        if h_refer.GetSumw2 is None:
+        if h_refer.GetSumw2() is None:
             h_refer.Sumw2(True)
 
         self.totalObj.append(h_refer)
@@ -133,7 +133,7 @@ class Ploter:
             y_min = y_min_auto * 0.99
 
         for i, hist in enumerate(hist_list_cp):
-            if hist.GetSumw2 is None:
+            if hist.GetSumw2() is None:
                 hist.Sumw2(True)
             if i == 0:
                 hist.Divide(h_refer)
@@ -414,7 +414,7 @@ class Ploter:
         if density:
             # print("performing shape comparison")
             for h in hist_list:
-                if h.GetSumw2 is None:
+                if h.GetSumw2() is None:
                     h.Sumw2()
                 h.Scale(1.0 / h.Integral())
 

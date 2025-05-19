@@ -1,6 +1,9 @@
 import random
 
 import ROOT
+
+ROOT.gErrorIgnoreLevel = 3000  # suppress TCanvas print info
+
 from omegaconf import DictConfig
 
 import vroot.tools.AtlasStyle

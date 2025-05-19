@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import ROOT
 from omegaconf import DictConfig, OmegaConf
 
 from vroot.hparams_mixin import HyperparametersMixin
@@ -28,6 +29,7 @@ class HistogramOptions(HyperparametersMixin):
     ) -> None:
         super().__init__()
         self.save_hyperparameters()
+        self.name = histname
 
     def __eq__(self, other) -> bool:
         return self.hparams.histname == other.hparams.histname
@@ -59,7 +61,8 @@ class HistogramOptions(HyperparametersMixin):
             hist.Rebin(self.hparams.rebin)
 
         if self.hparams.density and isinstance(hist, ROOT.TH1):
-            hist.Sumw2()
+            if hist.GetSumw2() is None:
+                hist.Sumw2()
             hist.Scale(1.0 / hist.Integral())
             hist.GetYaxis().SetTitle("Density")
         return hist
