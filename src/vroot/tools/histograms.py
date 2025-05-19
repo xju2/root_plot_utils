@@ -67,6 +67,9 @@ class HistogramOptions(HyperparametersMixin):
             hist.GetYaxis().SetTitle("Density")
         return hist
 
+    def __hash__(self) -> int:
+        return hash(self.name)
+
 
 class Histograms:
     def __init__(self, config: DictConfig) -> None:
@@ -79,7 +82,6 @@ class Histograms:
         self.parse_config(config)
 
     def parse_config(self, config: DictConfig) -> None:
-        """Parse the config."""
         if "histograms" not in config:
             if self.use_all:
                 return

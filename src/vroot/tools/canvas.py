@@ -1,12 +1,11 @@
+from __future__ import annotations
 import random
+from omegaconf import DictConfig
+import vroot.tools.AtlasStyle
 
 import ROOT
 
 ROOT.gErrorIgnoreLevel = 3000  # suppress TCanvas print info
-
-from omegaconf import DictConfig
-
-import vroot.tools.AtlasStyle
 
 
 class Canvas:

@@ -12,7 +12,6 @@ logger = get_pylogger(__name__)
 
 
 def convert_TEfficiency_to_TGraphAsymmErrors(hist: ROOT.TEfficiency) -> ROOT.TGraphAsymmErrors:
-    """Convert TEfficiency to TGraphAsymmErrors."""
     t_eff_total = hist.GetCopyTotalHisto()
     n_bins_x = t_eff_total.GetNbinsX()
 
@@ -52,7 +51,6 @@ class TH1FileHandle(HyperparametersMixin):
         return super().__repr__() + f"({self.hparams.name})"
 
     def read(self, histogram: HistogramOptions) -> ROOT.TH1:
-        """Read histogram from file and apply options."""
         th1 = self.read_by_name(histogram.name)
         th1_type = type(th1)
         hist = th1
@@ -86,7 +84,6 @@ class TH1FileHandle(HyperparametersMixin):
         return th1
 
     def get_all_histogram_names(self) -> list[str]:
-        """Get all histogram names in this file."""
         all_objects = {}
 
         def read_directory(directory):
