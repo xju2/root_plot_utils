@@ -41,6 +41,29 @@ class HistogramOptions(HyperparametersMixin):
     def __repr__(self) -> str:
         return str(self)
 
+    def __call__(self, hist: ROOT.TH1) -> ROOT.TH1:
+        # decorate the TH1.
+        if self.hparams.xlabel is not None:
+            hist.GetXaxis().SetTitle(self.hparams.xlabel)
+
+        if self.hparams.xlim is not None:
+            hist.GetXaxis().SetRangeUser(*self.hparams.xlim)
+
+        if self.hparams.ylabel is not None:
+            hist.GetYaxis().SetTitle(self.hparams.ylabel)
+
+        if self.hparams.ylim is not None:
+            hist.GetYaxis().SetRangeUser(*self.hparams.ylim)
+
+        if self.hparams.rebin is not None and self.hparams.rebin > 1 and isinstance(hist, ROOT.TH1):
+            hist.Rebin(self.hparams.rebin)
+
+        if self.hparams.density and isinstance(hist, ROOT.TH1):
+            hist.Sumw2()
+            hist.Scale(1.0 / hist.Integral())
+            hist.GetYaxis().SetTitle("Density")
+        return hist
+
 
 class Histograms:
     def __init__(self, config: DictConfig) -> None:

@@ -55,51 +55,25 @@ class TH1FileHandle(HyperparametersMixin):
         """Read histogram from file and apply options."""
         hist_options = histogram.hparams
         th1 = self.read_by_name(hist_options.histname)
-        th1_type = type(th1)
+        th1_type = type(hist)
         hist_copy = None
 
         if th1_type is ROOT.TEfficiency:
-            hist = convert_TEfficiency_to_TGraphAsymmErrors(th1)
-            hist_copy = th1.GetCopyPassedHisto()
-            hist_copy.Divide(th1.GetCopyPassedHisto(), th1.GetCopyTotalHisto(), 1.0, 1.0, "B")
-            hist_copy.SetLineWidth(2)
+            hist = convert_TEfficiency_to_TGraphAsymmErrors(hist)
         elif th1_type is ROOT.TProfile:
             hist = th1.ProjectionX()
         else:
             hist = th1
 
-        if hist_options.xlabel is not None:
-            hist.GetXaxis().SetTitle(hist_options.xlabel)
-            if hist_copy:
-                hist_copy.GetXaxis().SetTitle(hist_options.xlabel)
-
-        if hist_options.xlim is not None:
-            hist.GetXaxis().SetRangeUser(*hist_options.xlim)
-            if hist_copy:
-                hist_copy.GetXaxis().SetRangeUser(*hist_options.xlim)
-
-        if hist_options.ylabel is not None:
-            hist.GetYaxis().SetTitle(hist_options.ylabel)
-            if hist_copy:
-                hist_copy.GetYaxis().SetTitle(hist_options.ylabel)
-
-        if hist_options.ylim is not None:
-            hist.GetYaxis().SetRangeUser(*hist_options.ylim)
-            if hist_copy:
-                hist_copy.GetYaxis().SetRangeUser(*hist_options.ylim)
-
-        if hist_options.rebin is not None and hist_options.rebin > 1 and isinstance(hist, ROOT.TH1):
-            hist.Rebin(hist_options.rebin)
-
-        if hist_options.density and isinstance(hist, ROOT.TH1):
-            hist.Sumw2()
-            hist.Scale(1.0 / hist.Integral())
-            hist.GetYaxis().SetTitle("Density")
-
+        hist = hist_options(hist)
         hist.SetLineWidth(2)
         if th1_type is ROOT.TEfficiency:
-            return hist, hist_copy
-        return hist, hist
+            hist_copy = th1.GetCopyPassedHisto()
+            hist_copy.Divide(th1.GetCopyPassedHisto(), th1.GetCopyTotalHisto(), 1.0, 1.0, "B")
+            hist_copy.SetLineWidth(2)
+        else:
+            hist_copy = hist.Clone(hist.GetName() + "_copy")
+        return hist, hist_copy
 
     def read_by_name(self, histname: str) -> ROOT.TH1:
         th1 = self.file_handle.Get(histname)
