@@ -1,13 +1,9 @@
 # root_plot_utils
 Plotting macros based on ROOT
 
-## install ROOT via conda
-See the blog: https://iscinumpy.gitlab.io/post/root-conda/
+## Create the environment
+I use [nix.dev](https://nix.dev/) to create a reproduciable development environment.
 
-```bash
-conda install -c conda-forge root
-```
-To setup the environment, in Faraday, `conda-start tf2.7`.
 ## Run the example
 
 ### Plot histograms from a root file

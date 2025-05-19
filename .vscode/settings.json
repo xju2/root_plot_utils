@@ -2,5 +2,7 @@
     "files.associations": {
         "AtlasStyle.C": "cpp"
     },
-    "files.trimTrailingWhitespace": true
+    "files.trimTrailingWhitespace": true,
+    "IDX.aI.enableInlineCompletion": true,
+    "IDX.aI.enableCodebaseIndexing": true
 }

@@ -1,32 +1,23 @@
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "vroot"
-dynamic = ["version"]
-description = ''
+version = "1.1.1"
+description = 'Tools for ploting with ROOT'
 readme = "README.md"
-requires-python = ">=3.10"
-license = "MIT"
-keywords = []
 authors = [
   { name = "Xiangyang Ju", email = "xju@lbl.gov" },
 ]
-classifiers = [
-  "Development Status :: 4 - Beta",
-  "Programming Language :: Python",
-  "Programming Language :: Python :: 3.10",
-  "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: 3.12",
-]
+license = "MIT"
+requires-python = ">=3.10"
 dependencies = [
     "hydra-core",
     "hydra-colorlog",
     "hydra-optuna-sweeper",
     "numpy",
     "rich",
-    "ruff",
 ]
 
 [project.scripts]
@@ -37,10 +28,24 @@ Documentation = "https://github.com/xju2/root_plot_utils#readme"
 Issues = "https://github.com/xju2/root_plot_utils/issues"
 Source = "https://github.com/xju2/root_plot_utils"
 
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "~=3.7.1"
+ruff = "~=0.9.7"
+pytest = "~=8.2.1"
+pytest-cov = "~=5.0.0"
+
+[tool.poetry.group.docs.dependencies]
+mkdocs = "^1.6.1"
+mkdocstrings-python = "^1.16.10"
+pymdown-extensions = "^10.14.3"
 
 [tool.ruff]
 line-length = 100
-preview = false
+target-version = "py39"
+preview = true
 lint.select = ["ALL"]
 lint.ignore = [
     "D100", "D101", "D102", "D103", "D104", "D105", "D205", "D401", "D203", "D213", "D107", "D413",
@@ -51,28 +56,15 @@ lint.ignore = [
     "RET504", "SLF001", "TD003", "ARG002", "N999", "TRY201", "TRY003", "ANN204", "ANN202",
     "ANN001", "ANN201", "ANN003",
 ]
-extend-exclude = ["*.ipynb"]
+exclude = ["*.ipynb"]
 
-[tool.pydocstyle]
-convention = "numpy"
-
-[tool.hatch.version]
-path = "src/vroot/__about__.py"
-
-[tool.hatch.envs.types]
-extra-dependencies = [
-  "mypy>=1.0.0",
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = [
+    "F401",
 ]
-[tool.hatch.envs.types.scripts]
-check = "mypy --install-types --non-interactive {args:src/vroot tests}"
 
-[tool.coverage.run]
-source_pkgs = ["vroot", "tests"]
-branch = true
-parallel = true
-omit = [
-  "src/vroot/__about__.py",
-]
+[tool.ruff.lint.pydocstyle]
+convention = "google"
 
 [tool.coverage.paths]
 vroot = ["src/vroot", "*/vroot/src/vroot"]
