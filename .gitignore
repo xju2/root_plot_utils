@@ -10,6 +10,5 @@
 # logs from Hydra
 logs/
 
-*.root
 *.log
 outputs/

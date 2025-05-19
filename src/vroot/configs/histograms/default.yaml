@@ -3,4 +3,4 @@ num_track_names: 8
 track_latex_names: "d_{0}, z_{0}, q/p, q/p_{T}, #theta, #phi, p_{T}, z_{0}sin#theta"
 use_all_histograms: false
 
-track_dir_name: "Loose" # or TightPrimary
+track_dir_name: "" # or TightPrimary
