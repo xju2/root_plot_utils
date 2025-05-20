@@ -58,15 +58,17 @@ class TH1FileHandle(HyperparametersMixin):
 
         if th1_type is ROOT.TEfficiency:
             hist = convert_TEfficiency_to_TGraphAsymmErrors(th1)
+            hist.SetName(Path(histogram.name).name)
         elif th1_type is ROOT.TProfile:
             hist = th1.ProjectionX()
 
-        hist = histogram(hist)
+        histogram(hist)
         hist.SetLineWidth(2)
         if th1_type is ROOT.TEfficiency:
             hist_copy = th1.GetCopyPassedHisto()
             hist_copy.Divide(th1.GetCopyPassedHisto(), th1.GetCopyTotalHisto(), 1.0, 1.0, "B")
             hist_copy.SetLineWidth(2)
+            histogram(hist_copy)
         else:
             hist_copy = hist.Clone(hist.GetName() + "_copy")
         return hist, hist_copy

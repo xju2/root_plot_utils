@@ -37,7 +37,12 @@ class CompareTwoIdentidicalFiles(TaskBase):
         with_ratio = self.hparams.with_ratio
         for histogram in self.histograms:
             hist_ref, hist_ref_copy = self.ref_file.read(histogram)
+            hist_ref.SetName(hist_ref.GetName() + "_ref")
+            hist_ref_copy.SetName(hist_ref_copy.GetName() + "_ref")
+
             hist_comparator, hist_comparator_copy = self.comparator_file.read(histogram)
+            hist_comparator.SetName(hist_comparator.GetName() + "_comp")
+            hist_comparator_copy.SetName(hist_comparator_copy.GetName() + "_comp")
 
             # check if canvas needs adjustment for this histogram
             if "canvas" in histogram.hparams:

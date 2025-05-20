@@ -43,7 +43,7 @@ class HistogramOptions(HyperparametersMixin):
     def __repr__(self) -> str:
         return str(self)
 
-    def __call__(self, hist: ROOT.TH1) -> ROOT.TH1:
+    def __call__(self, hist: ROOT.TH1) -> None:
         # decorate the TH1.
         if self.hparams.xlabel is not None:
             hist.GetXaxis().SetTitle(self.hparams.xlabel)
@@ -55,6 +55,7 @@ class HistogramOptions(HyperparametersMixin):
             hist.GetYaxis().SetTitle(self.hparams.ylabel)
 
         if self.hparams.ylim is not None:
+            print("setting ylim", self.hparams.ylim, "for", hist.GetName())
             hist.GetYaxis().SetRangeUser(*self.hparams.ylim)
 
         if self.hparams.rebin is not None and self.hparams.rebin > 1 and isinstance(hist, ROOT.TH1):
@@ -65,7 +66,6 @@ class HistogramOptions(HyperparametersMixin):
                 hist.Sumw2()
             hist.Scale(1.0 / hist.Integral())
             hist.GetYaxis().SetTitle("Density")
-        return hist
 
     def __hash__(self) -> int:
         return hash(self.name)
@@ -134,7 +134,10 @@ class Histograms:
     def __str__(self) -> str:
         outstr = f"Total histograms: {len(self._histograms):,}\n"
         for hist in self._histograms:
-            outstr += "\t" + hist.hparams.histname + "\n"
+            y_lim_info = (
+                f"ylim({hist.hparams.ylim[0]}, {hist.hparams.ylim[1]})" if hist.hparams.ylim else ""
+            )
+            outstr += f"\t {hist.name} {y_lim_info}\n"
         return outstr
 
     def get_all_histograms(self, file_handle):

@@ -32,7 +32,7 @@ def main_function(cfg: DictConfig) -> None:
 
 @hydra.main(config_path="configs", config_name="run_task.yaml", version_base="1.2.0")
 def main_module(cfg: DictConfig) -> None:
-    print(OmegaConf.to_yaml(cfg))
+    # print(OmegaConf.to_yaml(cfg))
     main_function(cfg)
 
 
