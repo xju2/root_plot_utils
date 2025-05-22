@@ -55,7 +55,6 @@ class HistogramOptions(HyperparametersMixin):
             hist.GetYaxis().SetTitle(self.hparams.ylabel)
 
         if self.hparams.ylim is not None:
-            print("setting ylim", self.hparams.ylim, "for", hist.GetName())
             hist.GetYaxis().SetRangeUser(*self.hparams.ylim)
 
         if self.hparams.rebin is not None and self.hparams.rebin > 1 and isinstance(hist, ROOT.TH1):
