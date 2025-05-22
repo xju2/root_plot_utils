@@ -1,0 +1,17 @@
+defaults:
+  - default
+  - _self_
+
+histo_dir: SquirrelPlots/${histograms.track_dir_name}/Tracks/Tracks
+ylabel: "Density"
+ylim: [0., 1.01]
+ratio_ylim: [0.95, 1.09]
+rebin: 1
+density: true
+
+histograms:
+  - histname: "ntrack"
+  - histname: "ntracksel"
+  - histname: "nparticle"
+  - histname: "nparticlesel"
+  - histname: "num_truthmatch_match"

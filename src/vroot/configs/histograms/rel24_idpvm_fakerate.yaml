@@ -1,0 +1,13 @@
+defaults:
+  - default
+  - _self_
+
+histo_dir: SquirrelPlots/${histograms.track_dir_name}/Tracks/FakeRate
+ylabel: "Fractions of fake tracks among linked tracks"
+ylim: [0., 1.01]
+ratio_ylim: [0.95, 1.09]
+rebin: 1
+track_names: "eta, pt, lowpt, phi, d0, z0, mu"
+num_track_names: 5
+histograms:
+  - histname: ${gen_str:"fakerate_vs_{}", ${histograms.track_names}}
