@@ -1,19 +1,9 @@
-import pyrootutils
-
-root = pyrootutils.setup_root(
-    search_from=__file__,
-    indicator=[".git", "pyproject.toml"],
-    pythonpath=True,
-    dotenv=True,
-)
-
+from __future__ import annotations
+import ROOT
 from pathlib import Path
 
-import ROOT
 
-
-def main():
-    fname = root / "data/MyPhysVal_CKF.root"
+def main(fname: Path | str) -> None:
     # list all histograms in the ROOT file
     # and print their names
     # if the object is a directory, change directory
@@ -46,6 +36,7 @@ def main():
     print(set(all_object_types))
     for key, value in all_objects.items():
         print(key, len(value))
+
 
 if __name__ == "__main__":
     main()
