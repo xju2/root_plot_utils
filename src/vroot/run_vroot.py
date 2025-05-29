@@ -41,7 +41,10 @@ def main() -> None:
     import importlib.util
 
     spec = importlib.util.find_spec("vroot")
-    os.environ["PROJECT_ROOT"] = str(Path(spec.origin).parent.parent.parent)
+    if "PROJECT_ROOT" not in os.environ:
+        os.environ["PROJECT_ROOT"] = str(Path(spec.origin).parent.parent.parent)
+
+    print(f"PROJECT_ROOT is {os.environ['PROJECT_ROOT']}")
     main_module()
 
 
