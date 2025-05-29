@@ -1,4 +1,13 @@
 #!/bin/bash
 
-# scp pl:/pscratch/sd/x/xju/workflow/workarea/tracking/MuonPU0/idpvm.gnn4itkML.triton.gnn4itkTriton.tracking.MuonPU0.root data/gnn4itk/
-scp pl:/pscratch/sd/x/xju/workflow/workarea/tracking/MuonPU0/idpvm.ckf.local.gnn4itkTriton.none.MuonPU0.root data/gnn4itk/
+download(){
+	BASEDIR="/global/cfs/cdirs/m3443/usr/xju/workflow/workarea/tracking/"
+	SAMPLE=$1
+	IDPVM_MODE="primary"
+	scp pl:${BASEDIR}/$SAMPLE/idpvm.ckf.${IDPVM_MODE}.local.gnn4itkTriton.none.$SAMPLE.root data/gnn4itk/
+	scp pl:${BASEDIR}/$SAMPLE/idpvm.gnn4itkML.${IDPVM_MODE}.triton.gnn4itkTriton.tracking.$SAMPLE.root data/gnn4itk/
+}
+
+#download ttbar
+# download MuonPU0
+download ZmumuPU200

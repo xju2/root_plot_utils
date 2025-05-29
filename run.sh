@@ -51,19 +51,21 @@ run_vroot -m \
 }
 
 gnn4itkML() {
-  if [ $# -ne 1 ]; then
-    echo "Usage: $0 <sampleName>"
+  if [ $# -ne 3 ]; then
+    echo "Usage: $0 <sampleName> <sampleLabel> <IDPVM_MODE>"
     exit 1
   fi
-  local sampleName=$1
+  local sampleName="$1"
+  local sampleLabel="$2"
+  local IDPVM_MODE="$3"
 run_vroot -m \
   task_name=gnn4pixel task=compare_two_files \
-  task.reference_file.path=data/gnn4itk/idpvm.ckf.local.gnn4itkTriton.none.${sampleName}.root \
+  task.reference_file.path=data/gnn4itk/idpvm.ckf.${IDPVM_MODE}.local.gnn4itkTriton.none.${sampleName}.root \
   task.reference_file.name=main \
-  task.comparator_file.path=data/gnn4itk/idpvm.gnn4itkML.triton.gnn4itkTriton.tracking.${sampleName}.root \
+  task.comparator_file.path=data/gnn4itk/idpvm.gnn4itkML.${IDPVM_MODE}.triton.gnn4itkTriton.tracking.${sampleName}.root \
   task.comparator_file.name="GNN w/ Metric Learning" \
   "histograms=glob(rel24_idpvm*)" \
-  "canvas.other_label.text='#sqrt{s} = 14 TeV, t#bar{t}, <#mu> = 200, All'" \
+  "canvas.other_label.text='#sqrt{s} = 14 TeV, ${sampleLabel}'" \
   canvas.otypes=png,pdf
 }
 
@@ -71,7 +73,8 @@ run_vroot -m \
 # gnn4pixel_without_AR
 # gnn4ITk_ML_no_AR
 
-# gnn4itkML_ttbar
+#gnn4itkML_ttbar
 
-# gnn4itkML "ZmumuPU200"
-gnn4itkML "MuonPU0"
+gnn4itkML "ZmumuPU200" "Z#rightarrow#mu#mu, <#mu> = 200, All" "primary"
+# gnn4itkML "MuonPU0" "single muon, <#mu>=0, All" "primary"
+#gnn4itkML "ttbar" "t#bar{t}, <#mu> = 200, All" "primary"
