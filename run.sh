@@ -98,5 +98,6 @@ compare_gnn_with_gnn() {
   "canvas.other_label.text='#sqrt{s} = 14 TeV, ${sampleLabel}'" \
   canvas.otypes=png,pdf
 }
-# compare_gnn_with_gnn "MuonPU0" "single muon, <#mu>=0, All"
-compare_gnn_with_gnn "ttbar" "t#bar{t}, <#mu> = 200, All"
+compare_gnn_with_gnn "MuonPU0" "single muon, <#mu>=0, HS"
+# compare_gnn_with_gnn "ttbar" "t#bar{t}, <#mu> = 200, HS"
+compare_gnn_with_gnn "PionPU0" "single pion, <#mu>=0, HS"

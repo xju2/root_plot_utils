@@ -18,7 +18,7 @@ num_track_names: 4
 
 histograms:
   - histname: ${gen_str:"resolution_vs_eta_{}", ${histograms.track_names}}
-    ylim: [[2, 300], [10, 100_000], [0, 1000], [0.008, 5]]
+    ylim: [[2, 300], [10, 100_000], [0, 1000], [0.0008, 5]]
     is_logy: [false, true, false, true]
 
   - histname: ${gen_str:"resolution_vs_pt_{}", ${histograms.track_names}}
