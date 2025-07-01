@@ -75,6 +75,28 @@ run_vroot -m \
 
 #gnn4itkML_ttbar
 
-gnn4itkML "ZmumuPU200" "Z#rightarrow#mu#mu, <#mu> = 200, All" "primary"
+# gnn4itkML "ZmumuPU200" "Z#rightarrow#mu#mu, <#mu> = 200, All" "primary"
 # gnn4itkML "MuonPU0" "single muon, <#mu>=0, All" "primary"
 #gnn4itkML "ttbar" "t#bar{t}, <#mu> = 200, All" "primary"
+
+compare_gnn_with_gnn() {
+  local sampleName="$1"
+  local sampleLabel="$2"
+  local IDPVM_MODE="primary"
+  RUN_1_DIR_NAME="tracking_v1_maxHoles5"
+  RUN_2_DIR_NAME="tracking"
+  FILE_BASE_DIR="/global/cfs/cdirs/m3443/usr/xju/workflow/workarea"
+  SAMPLE_DIR="${sampleName}/idpvm.gnn4itkML.${IDPVM_MODE}.triton.gnn4itkTriton.tracking.${sampleName}.root"
+
+  run_vroot -m \
+  task_name=gnn4pixel task=compare_two_files \
+  task.reference_file.path=${FILE_BASE_DIR}/$RUN_2_DIR_NAME/$SAMPLE_DIR \
+  task.reference_file.name="Max 4 holes" \
+  task.comparator_file.path=${FILE_BASE_DIR}/$RUN_1_DIR_NAME/$SAMPLE_DIR \
+  task.comparator_file.name="Max 5 holes" \
+  "histograms=glob(rel24_idpvm*)" \
+  "canvas.other_label.text='#sqrt{s} = 14 TeV, ${sampleLabel}'" \
+  canvas.otypes=png,pdf
+}
+# compare_gnn_with_gnn "MuonPU0" "single muon, <#mu>=0, All"
+compare_gnn_with_gnn "ttbar" "t#bar{t}, <#mu> = 200, All"

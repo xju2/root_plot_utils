@@ -63,7 +63,8 @@ class HistogramOptions(HyperparametersMixin):
         if self.hparams.density and isinstance(hist, ROOT.TH1):
             if hist.GetSumw2() is None:
                 hist.Sumw2()
-            hist.Scale(1.0 / hist.Integral())
+
+            hist.Scale(1.0 / (hist.Integral() + 1e-10))
             hist.GetYaxis().SetTitle("Density")
 
     def __hash__(self) -> int:
