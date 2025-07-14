@@ -98,6 +98,31 @@ compare_gnn_with_gnn() {
   "canvas.other_label.text='#sqrt{s} = 14 TeV, ${sampleLabel}'" \
   canvas.otypes=png,pdf
 }
-compare_gnn_with_gnn "MuonPU0" "single muon, <#mu>=0, HS"
+
+compare_endcapEtaOLSP() {
+  local sampleName="$1"
+  local sampleLabel="$2"
+  local IDPVM_MODE="primary"
+  RUN_1_DIR_NAME="tracking_v2_maxHoles442_withEtaOverlapSPs"
+  RUN_2_DIR_NAME="tracking"
+  FILE_BASE_DIR="/global/cfs/cdirs/m3443/usr/xju/workflow/workarea"
+
+  run_vroot -m \
+  task_name=gnn4pixel task=compare_two_files \
+  task.reference_file.path=${FILE_BASE_DIR}/$RUN_1_DIR_NAME/${sampleName}/idpvm.gnn4itkML.${IDPVM_MODE}.triton.gnn4itkTriton.tracking.${sampleName}.root \
+  task.reference_file.name="with EndcapEtaOLSP" \
+  task.comparator_file.path=${FILE_BASE_DIR}/$RUN_2_DIR_NAME/${sampleName}/idpvm.gnn4itkMLNoEndcapOLSP.${IDPVM_MODE}.triton.gnn4itkTriton.tracking.${sampleName}.root \
+  task.comparator_file.name="w/o EndcapEtaOLSP" \
+  "histograms=glob(rel24_idpvm*)" \
+  "canvas.other_label.text='#sqrt{s} = 14 TeV, ${sampleLabel}'" \
+  'canvas.otypes=png,pdf' \
+  'canvas=with_ratio' \
+  'task.with_ratio=true'
+}
+#compare_gnn_with_gnn "MuonPU0" "single muon, <#mu>=0, HS"
+#compare_gnn_with_gnn "PionPU0" "single pion, <#mu>=0, HS"
 # compare_gnn_with_gnn "ttbar" "t#bar{t}, <#mu> = 200, HS"
-compare_gnn_with_gnn "PionPU0" "single pion, <#mu>=0, HS"
+
+compare_endcapEtaOLSP "ttbar" "t#bar{t}, <#mu> = 200, HS"
+compare_endcapEtaOLSP "PionPU0" "single pion, <#mu>=0, HS"
+compare_endcapEtaOLSP "MuonPU0" "single muon, <#mu>=0, HS"
